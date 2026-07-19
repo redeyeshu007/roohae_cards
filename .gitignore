@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.next/
+out/
+coverage/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# uploads (local storage in development)
+apps/api/uploads/
+
+# misc
+*.log
+.DS_Store
+.turbo/
+tsconfig.tsbuildinfo

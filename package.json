@@ -1,0 +1,21 @@
+{
+  "name": "roohae-cards",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Roohae Cards — template-driven design platform (Canva-class SaaS)",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev --workspace @roohae/api",
+    "dev:admin": "npm run dev --workspace @roohae/admin",
+    "dev:user": "npm run dev --workspace @roohae/user",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "seed": "npm run seed --workspace @roohae/api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

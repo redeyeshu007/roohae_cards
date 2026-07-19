@@ -1,0 +1,28 @@
+{
+  "name": "@roohae/editor-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@roohae/shared": "*",
+    "fabric": "^6.5.4",
+    "pdf-lib": "^1.17.1"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/react": "^19.0.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.7.2"
+  }
+}
