@@ -33,48 +33,48 @@ const handCalligraphy = Great_Vibes({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--hand-calligraphy",
-  display: "optional",
+  display: "swap",
 });
 
 const handBrush = Caveat_Brush({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--hand-brush",
-  display: "optional",
+  display: "swap",
 });
 
 const handScript = Dancing_Script({
   subsets: ["latin"],
   variable: "--hand-script",
-  display: "optional",
+  display: "swap",
 });
 
 const handFountain = Cedarville_Cursive({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--hand-fountain",
-  display: "optional",
+  display: "swap",
 });
 
 const handMarker = Permanent_Marker({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--hand-marker",
-  display: "optional",
+  display: "swap",
 });
 
 const handFinale = Pinyon_Script({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--hand-finale",
-  display: "optional",
+  display: "swap",
 });
 
 const handMinimal = Shadows_Into_Light({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--hand-minimal",
-  display: "optional",
+  display: "swap",
 });
 
 const hands = [
