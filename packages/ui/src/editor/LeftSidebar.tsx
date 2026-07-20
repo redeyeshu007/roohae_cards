@@ -24,6 +24,7 @@ import type {
   EditableField,
   ImagePlaceholder,
   LayerEntry,
+  PageEntry,
   RoohaeEditor,
   ShapeKind,
 } from '@roohae/editor-sdk';
@@ -99,6 +100,7 @@ export function EditorLeftSidebar({
   editableFields,
   fonts: _fonts,
   layers,
+  pages,
 }: {
   editor: RoohaeEditor | null;
   sections: SidebarSection[];
@@ -108,6 +110,7 @@ export function EditorLeftSidebar({
   editableFields?: EditableField[];
   fonts?: Font[];
   layers: LayerEntry[];
+  pages?: PageEntry[];
 }) {
   const [active, setActive] = useState<SidebarSection | null>(sections[0] ?? null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -148,6 +151,44 @@ export function EditorLeftSidebar({
             {SECTION_META[section].label}
           </button>
         ))}
+
+        {editor && pages && (
+          <div className="mt-auto flex flex-col gap-2 w-full pt-4 border-t border-[#E7DDD6]/50">
+            {(() => {
+              const activePage = pages.find((p) => p.active);
+              if (!activePage) return null;
+              const activeIndex = activePage.index;
+              const isFront = activeIndex % 2 === 0;
+              const frontIndex = Math.floor(activeIndex / 2) * 2;
+              return (
+                <>
+                   <button
+                     onClick={() => void editor.setActivePage(frontIndex)}
+                     className={cn(
+                       'flex w-full flex-col items-center justify-center gap-1 rounded-[14px] py-3.5 text-[9px] font-secondary font-bold tracking-[0.1em] uppercase transition-all duration-300',
+                       isFront
+                         ? 'bg-[#1F1F1F] text-white shadow-md'
+                         : 'text-[#8CA3B0] hover:bg-[#F8F4EF]/60 hover:text-[#1F1F1F] border border-transparent hover:border-[#E7DDD6]'
+                     )}
+                   >
+                     FRONT
+                   </button>
+                   <button
+                     onClick={() => void editor.setActivePage(frontIndex + 1)}
+                     className={cn(
+                       'flex w-full flex-col items-center justify-center gap-1 rounded-[14px] py-3.5 text-[9px] font-secondary font-bold tracking-[0.1em] uppercase transition-all duration-300',
+                       !isFront
+                         ? 'bg-[#1F1F1F] text-white shadow-md'
+                         : 'text-[#8CA3B0] hover:bg-[#F8F4EF]/60 hover:text-[#1F1F1F] border border-transparent hover:border-[#E7DDD6]'
+                     )}
+                   >
+                     BACK
+                   </button>
+                 </>
+              );
+            })()}
+          </div>
+        )}
       </nav>
 
       {/* Drawer */}

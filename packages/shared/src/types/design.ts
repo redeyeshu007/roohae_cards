@@ -76,7 +76,13 @@ export function createEmptyDocument(width: number, height: number): DesignDocume
     pages: [
       {
         id: crypto.randomUUID(),
-        name: 'Page 1',
+        name: 'Front Page',
+        background: '#ffffff',
+        objects: [],
+      },
+      {
+        id: crypto.randomUUID(),
+        name: 'Back Page',
         background: '#ffffff',
         objects: [],
       },

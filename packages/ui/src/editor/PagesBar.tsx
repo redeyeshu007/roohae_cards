@@ -19,22 +19,33 @@ export function PagesBar({
   allowPageManagement: boolean;
 }) {
   const active = pages.find((p) => p.active);
+  const activeCardIndex = active ? Math.floor(active.index / 2) : 0;
+  const frontIndex = activeCardIndex * 2;
+
+  const cards = [];
+  for (let i = 0; i < pages.length; i += 2) {
+    cards.push({
+      index: i,
+      name: `Page ${Math.floor(i / 2) + 1}`,
+      active: Math.floor(i / 2) === activeCardIndex,
+    });
+  }
 
   return (
     <footer className="flex h-12 shrink-0 items-center gap-2 border-t border-slate-200 bg-white px-3 dark:border-slate-800 dark:bg-slate-900">
       <div className="flex flex-1 items-center gap-1.5 overflow-x-auto">
-        {pages.map((page) => (
+        {cards.map((card) => (
           <button
-            key={page.id}
-            onClick={() => void editor?.setActivePage(page.index)}
+            key={card.index}
+            onClick={() => void editor?.setActivePage(card.index)}
             className={cn(
               'shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
-              page.active
+              card.active
                 ? 'bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300'
                 : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800',
             )}
           >
-            {page.name}
+            {card.name}
           </button>
         ))}
 
@@ -51,7 +62,7 @@ export function PagesBar({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    onClick={() => void editor?.duplicatePage(active.index)}
+                    onClick={() => void editor?.duplicatePage(frontIndex)}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -60,8 +71,8 @@ export function PagesBar({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    disabled={active.index === 0}
-                    onClick={() => void editor?.reorderPage(active.index, active.index - 1)}
+                    disabled={frontIndex === 0}
+                    onClick={() => void editor?.reorderPage(frontIndex, frontIndex - 2)}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -70,8 +81,8 @@ export function PagesBar({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    disabled={active.index === pages.length - 1}
-                    onClick={() => void editor?.reorderPage(active.index, active.index + 1)}
+                    disabled={frontIndex >= pages.length - 2}
+                    onClick={() => void editor?.reorderPage(frontIndex, frontIndex + 2)}
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -80,8 +91,8 @@ export function PagesBar({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    disabled={pages.length <= 1}
-                    onClick={() => void editor?.deletePage(active.index)}
+                    disabled={pages.length <= 2}
+                    onClick={() => void editor?.deletePage(frontIndex)}
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>

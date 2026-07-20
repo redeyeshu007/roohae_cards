@@ -272,44 +272,72 @@ export class RoohaeEditor {
     await this.loadPage(index);
   }
 
+  private reindexPageNames() {
+    for (let i = 0; i < this.doc.pages.length; i++) {
+      const page = this.doc.pages[i];
+      if (!page) continue;
+      const pairNumber = Math.floor(i / 2) + 1;
+      const side = i % 2 === 0 ? 'Front' : 'Back';
+      page.name = `Page ${pairNumber} ${side}`;
+    }
+  }
+
   async addPage(): Promise<void> {
     if (this.mode === 'user') return;
     this.syncActivePage();
-    this.doc.pages.push({
-      id: newObjectId(),
-      name: `Page ${this.doc.pages.length + 1}`,
-      background: '#ffffff',
-      objects: [],
-    });
-    await this.loadPage(this.doc.pages.length - 1);
+    this.doc.pages.push(
+      {
+        id: newObjectId(),
+        name: '',
+        background: '#ffffff',
+        objects: [],
+      },
+      {
+        id: newObjectId(),
+        name: '',
+        background: '#ffffff',
+        objects: [],
+      }
+    );
+    this.reindexPageNames();
+    await this.loadPage(this.doc.pages.length - 2);
   }
 
   async duplicatePage(index: number): Promise<void> {
     if (this.mode === 'user') return;
     this.syncActivePage();
-    const source = this.doc.pages[index];
-    if (!source) return;
-    const copy = structuredClone(source);
-    copy.id = newObjectId();
-    copy.name = `${source.name} (copy)`;
-    copy.objects = copy.objects.map((o) => ({ ...o, id: newObjectId() }));
-    this.doc.pages.splice(index + 1, 0, copy);
-    await this.loadPage(index + 1);
+    const frontSource = this.doc.pages[index];
+    const backSource = this.doc.pages[index + 1];
+    if (!frontSource || !backSource) return;
+    
+    const frontCopy = structuredClone(frontSource);
+    frontCopy.id = newObjectId();
+    frontCopy.objects = frontCopy.objects.map((o) => ({ ...o, id: newObjectId() }));
+    
+    const backCopy = structuredClone(backSource);
+    backCopy.id = newObjectId();
+    backCopy.objects = backCopy.objects.map((o) => ({ ...o, id: newObjectId() }));
+    
+    this.doc.pages.splice(index + 2, 0, frontCopy, backCopy);
+    this.reindexPageNames();
+    await this.loadPage(index + 2);
   }
 
   async deletePage(index: number): Promise<void> {
     if (this.mode === 'user') return;
-    if (this.doc.pages.length <= 1) return;
-    this.doc.pages.splice(index, 1);
-    await this.loadPage(Math.min(this.activePageIndex, this.doc.pages.length - 1));
+    if (this.doc.pages.length <= 2) return;
+    this.doc.pages.splice(index, 2);
+    this.reindexPageNames();
+    await this.loadPage(Math.min(this.activePageIndex, this.doc.pages.length - 2));
   }
 
   async reorderPage(from: number, to: number): Promise<void> {
     if (this.mode === 'user') return;
-    if (from === to || !this.doc.pages[from] || to < 0 || to >= this.doc.pages.length) return;
+    if (from === to || !this.doc.pages[from] || !this.doc.pages[from + 1] || to < 0 || to >= this.doc.pages.length) return;
     this.syncActivePage();
-    const [moved] = this.doc.pages.splice(from, 1);
-    this.doc.pages.splice(to, 0, moved!);
+    const movedPair = this.doc.pages.splice(from, 2);
+    this.doc.pages.splice(to, 0, ...movedPair);
+    this.reindexPageNames();
     await this.loadPage(to);
   }
 

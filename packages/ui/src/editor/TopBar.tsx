@@ -26,6 +26,7 @@ export function EditorTopBar({
   title,
   onTitleChange,
   onBack,
+  onPreview,
   editor,
   canUndo,
   canRedo,
@@ -35,6 +36,7 @@ export function EditorTopBar({
   title: string;
   onTitleChange?: (title: string) => void;
   onBack: () => void;
+  onPreview?: () => void;
   editor: RoohaeEditor | null;
   canUndo: boolean;
   canRedo: boolean;
@@ -126,11 +128,18 @@ export function EditorTopBar({
         <div className="h-5 w-px bg-[#E7DDD6]" />
 
         {/* Preview */}
-        <Tip label="Preview design">
-          <Button variant="ghost" size="icon-sm" className="text-[#6B6B6B] hover:text-[#1F1F1F] hover:bg-[#F8F4EF] rounded-xl">
-            <Monitor className="h-4 w-4" />
-          </Button>
-        </Tip>
+        {onPreview && (
+          <Tip label="Preview design">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={onPreview}
+              className="text-[#6B6B6B] hover:text-[#1F1F1F] hover:bg-[#F8F4EF] rounded-xl"
+            >
+              <Monitor className="h-4 w-4" />
+            </Button>
+          </Tip>
+        )}
 
         {/* Keyboard shortcuts */}
         <Tip label="Keyboard shortcuts">

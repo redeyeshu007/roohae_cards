@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Download, Eye, Save } from 'lucide-react';
+import { Download, Eye, RefreshCw, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AUTOSAVE_INTERVAL_MS,
@@ -132,7 +132,8 @@ export function ProjectEditor({
   const [title, setTitle] = useState('');
   const titleInitialized = useRef(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [previewFlipped, setPreviewFlipped] = useState(false);
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
@@ -213,10 +214,17 @@ export function ProjectEditor({
   async function openPreview() {
     const editor = editorRef.current;
     if (!editor) return;
+    const document = editor.getDocument();
     const exporter = new ExportService(resolveAsset);
-    const url = await exporter.preview(editor.getDocument(), 0);
-    setPreviewUrl(url);
+    
+    setPreviewUrls([]);
+    setPreviewFlipped(false);
     setPreviewOpen(true);
+    
+    const urls = await Promise.all(
+      document.pages.map((_, i) => exporter.preview(document, i))
+    );
+    setPreviewUrls(urls);
   }
 
   async function download(format: ExportFormat, scale?: number) {
@@ -294,6 +302,7 @@ export function ProjectEditor({
           getGalleryAsset: (id) => galleryMapRef.current.get(id),
         }}
         fonts={fonts ?? []}
+        onPreview={() => void openPreview()}
         topBarActions={
           <>
             <Button
@@ -303,9 +312,6 @@ export function ProjectEditor({
               onClick={() => void persist({ manual: true, withThumbnail: true })}
             >
               <Save className="h-4 w-4" /> Save
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => void openPreview()}>
-              <Eye className="h-4 w-4" /> Preview
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -342,20 +348,61 @@ export function ProjectEditor({
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent 
           title="Preview" 
-          className="max-w-3xl bg-[#F8F4EF]"
+          className="max-w-4xl bg-[#F8F4EF]"
           style={{
             backgroundImage: 'radial-gradient(#D6CFC4 1px, transparent 1px)',
             backgroundSize: '24px 24px'
           }}
         >
-          {previewUrl && (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={previewUrl}
-              alt="Design preview"
-              className="max-h-[70vh] w-full rounded-xl object-contain shadow-card"
-            />
-          )}
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            {previewUrls.length > 0 && (
+              <div 
+                className="relative w-full max-w-2xl h-[65vh] [perspective:2000px] group cursor-pointer"
+                onClick={() => previewUrls.length > 1 && setPreviewFlipped(f => !f)}
+              >
+                <div 
+                  className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${previewFlipped ? '[transform:rotateY(180deg)]' : ''}`}
+                >
+                  {/* Front */}
+                  <div className="absolute inset-0 [backface-visibility:hidden] flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={previewUrls[0]}
+                      alt="Front preview"
+                      className="max-w-full max-h-full object-contain shadow-2xl rounded-sm ring-1 ring-slate-900/5 bg-white" 
+                    />
+                  </div>
+                  {/* Back */}
+                  {previewUrls.length > 1 && (
+                    <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] flex items-center justify-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img 
+                        src={previewUrls[1]}
+                        alt="Back preview"
+                        className="max-w-full max-h-full object-contain shadow-2xl rounded-sm ring-1 ring-slate-900/5 bg-white" 
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {previewUrls.length > 1 && (
+              <div className="mt-6 flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setPreviewFlipped(f => !f)}
+                  className="rounded-full shadow-sm"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Flip Card
+                </Button>
+                <span className="text-sm text-slate-500">
+                  {previewFlipped ? 'Back' : 'Front'} Page
+                </span>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>

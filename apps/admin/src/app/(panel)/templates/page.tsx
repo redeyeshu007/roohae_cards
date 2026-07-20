@@ -2,7 +2,7 @@
 
 import { memo, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LayoutTemplate, MoreHorizontal, Plus, Search } from 'lucide-react';
+import { LayoutTemplate, Plus, Search } from 'lucide-react';
 import type { Template, TemplateStatus } from '@roohae/shared';
 import {
   Badge,
@@ -10,11 +10,6 @@ import {
   Card,
   Dialog,
   DialogContent,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
   EmptyState,
   Input,
   Label,
@@ -29,12 +24,10 @@ import {
   TabsTrigger,
 } from '@roohae/ui';
 import { PageHeader } from '@/components/AdminShell';
+import { TemplateTableActions } from '@/components/TemplateTableActions';
 import {
   useCategories,
   useCreateTemplate,
-  useDeleteTemplate,
-  useDuplicateTemplate,
-  useSetTemplateStatus,
   useTemplates,
 } from '@/lib/queries';
 
@@ -54,9 +47,6 @@ export default function TemplatesPage() {
     status: status === 'all' ? undefined : status,
     search,
   });
-  const setStatusMutation = useSetTemplateStatus();
-  const duplicateMutation = useDuplicateTemplate();
-  const deleteMutation = useDeleteTemplate();
 
   return (
     <>
@@ -108,102 +98,80 @@ export default function TemplatesPage() {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {data.items.map((template) => (
-            <TemplateCard
-              key={template.id}
-              template={template}
-              onOpen={() => router.push(`/editor/${template.id}`)}
-              onPublish={() =>
-                setStatusMutation.mutate({
-                  id: template.id,
-                  status: template.status === 'published' ? 'draft' : 'published',
-                })
-              }
-              onArchive={() => setStatusMutation.mutate({ id: template.id, status: 'archived' })}
-              onDuplicate={() => duplicateMutation.mutate(template.id)}
-              onDelete={() => deleteMutation.mutate(template.id)}
-            />
-          ))}
-        </div>
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
+                <tr>
+                  <th className="w-12 px-6 py-3 font-medium">
+                    <input type="checkbox" className="rounded border-slate-300" disabled />
+                  </th>
+                  <th className="px-6 py-3 font-medium">Name</th>
+                  <th className="px-6 py-3 font-medium">Category</th>
+                  <th className="px-6 py-3 font-medium">Uses</th>
+                  <th className="px-6 py-3 font-medium">Status</th>
+                  <th className="w-12 px-6 py-3 font-medium"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {data.items.map((template) => (
+                  <tr key={template.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                    <td className="px-6 py-3.5">
+                      <input type="checkbox" className="rounded border-slate-300" disabled />
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-12 overflow-hidden rounded bg-slate-100 dark:bg-slate-800 shrink-0">
+                          {template.thumbnailUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={template.thumbnailUrl}
+                              alt={template.title}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-slate-300">
+                              <LayoutTemplate className="h-4 w-4" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-slate-100">
+                            {template.title}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {template.width}×{template.height} {template.unit}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-3.5 text-slate-500">
+                      {template.category?.name ?? '—'}
+                    </td>
+                    <td className="px-6 py-3.5 text-slate-500">
+                      {template.usageCount ?? 0}
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <Badge variant={STATUS_BADGE[template.status]} className="capitalize">
+                        {template.status}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-3.5 text-right">
+                      <TemplateTableActions template={template} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
 
       <CreateTemplateDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
   );
 }
-
-const TemplateCard = memo(function TemplateCard({
-  template,
-  onOpen,
-  onPublish,
-  onArchive,
-  onDuplicate,
-  onDelete,
-}: {
-  template: Template;
-  onOpen: () => void;
-  onPublish: () => void;
-  onArchive: () => void;
-  onDuplicate: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <Card className="group overflow-hidden">
-      <button onClick={onOpen} className="block w-full">
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-          {template.thumbnailUrl ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={template.thumbnailUrl}
-              alt={template.title}
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-slate-300 dark:text-slate-600">
-              <LayoutTemplate className="h-10 w-10" />
-            </div>
-          )}
-        </div>
-      </button>
-      <div className="flex items-start justify-between gap-2 p-4">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{template.title}</p>
-          <p className="mt-0.5 truncate text-xs text-slate-500">
-            {template.category?.name ?? '—'} · {template.width}×{template.height}
-            {template.unit}
-          </p>
-          <Badge variant={STATUS_BADGE[template.status]} className="mt-2 capitalize">
-            {template.status}
-          </Badge>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={onOpen}>Open in editor</DropdownMenuItem>
-            <DropdownMenuItem onSelect={onPublish}>
-              {template.status === 'published' ? 'Unpublish' : 'Publish'}
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onDuplicate}>Duplicate</DropdownMenuItem>
-            {template.status !== 'archived' && (
-              <DropdownMenuItem onSelect={onArchive}>Archive</DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem destructive onSelect={onDelete}>
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </Card>
-  );
-});
 
 /**
  * Canva-style "create design" flow: pick a category → dimensions auto-fill →

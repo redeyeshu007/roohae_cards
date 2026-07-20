@@ -17,6 +17,7 @@ export interface EditorWorkspaceProps {
   title: string;
   onTitleChange?: (title: string) => void;
   onBack: () => void;
+  onPreview?: () => void;
   resolveAsset: (assetId: string) => string | undefined;
   /** Called (debounce upstream) whenever the design changes — autosave hook. */
   onDocumentChange?: () => void;
@@ -111,6 +112,7 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
         title={props.title}
         onTitleChange={props.onTitleChange}
         onBack={props.onBack}
+        onPreview={props.onPreview}
         editor={editor}
         canUndo={canUndo}
         canRedo={canRedo}
@@ -129,6 +131,7 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
             editableFields={editor && ready ? editor.getEditableFields() : []}
             fonts={props.fonts}
             layers={layers}
+            pages={pages}
           />
         </div>
 
