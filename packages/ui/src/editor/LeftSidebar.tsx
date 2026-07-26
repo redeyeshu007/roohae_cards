@@ -17,6 +17,7 @@ import {
   Triangle,
   Type,
   Upload,
+  Wrench,
 } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Asset, Font } from '@roohae/shared';
@@ -34,6 +35,8 @@ import { ColorField } from './ColorField';
 import { LayersPanel } from './LayersPanel';
 import { PlaceholdersPanel, type PlaceholderBrowserProps } from './PlaceholdersPanel';
 import { EditableFieldsPanel } from './EditableFieldsPanel';
+import { BackgroundPanel } from './BackgroundPanel';
+import { ToolsPanel } from './ToolsPanel';
 
 export type SidebarSection =
   | 'text'
@@ -42,6 +45,7 @@ export type SidebarSection =
   | 'placeholders'
   | 'fields'
   | 'background'
+  | 'tools'
   | 'layers';
 
 const SECTION_META: Record<SidebarSection, { label: string; icon: ReactNode }> = {
@@ -51,6 +55,7 @@ const SECTION_META: Record<SidebarSection, { label: string; icon: ReactNode }> =
   placeholders: { label: 'Editable', icon: <ImageIcon className="h-5 w-5 mb-0.5" /> },
   fields: { label: 'Fields', icon: <Type className="h-5 w-5 mb-0.5" /> },
   background: { label: 'Canvas', icon: <PaintBucket className="h-5 w-5 mb-0.5" /> },
+  tools: { label: 'Tools', icon: <Wrench className="h-5 w-5 mb-0.5" /> },
   layers: { label: 'Layers', icon: <Layers className="h-5 w-5 mb-0.5" /> },
 };
 
@@ -89,6 +94,8 @@ export interface AssetBrowserProps {
   hasMore?: boolean;
   loadingMore?: boolean;
   onLoadMore?: () => void;
+  /** Upload handler for background images */
+  onUploadBackground?: (file: File) => Promise<{ id: string; url: string }>;
 }
 
 export function EditorLeftSidebar({
@@ -233,6 +240,10 @@ export function EditorLeftSidebar({
               </div>
             )}
 
+            {active === 'tools' && (
+              <ToolsPanel editor={editor} />
+            )}
+
             {active === 'images' && assetBrowser && (
               <div className="space-y-3">
                 {assetBrowser.onUpload && (
@@ -363,28 +374,11 @@ export function EditorLeftSidebar({
             )}
 
             {active === 'background' && editor && (
-              <div className="space-y-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                  Page color
-                </p>
-                <ColorField
-                  value={editor.getPageBackground()}
-                  onChange={(hex) => editor.setPageBackground(hex)}
-                />
-                <div className="grid grid-cols-6 gap-2">
-                  {['#ffffff', '#f8fafc', '#fef3c7', '#dcfce7', '#dbeafe', '#fce7f3', '#ede9fe', '#0f172a', '#1e293b', '#7c3aed', '#0ea5e9', '#f43f5e'].map(
-                    (hex) => (
-                      <button
-                        key={hex}
-                        onClick={() => editor.setPageBackground(hex)}
-                        className="aspect-square rounded-lg border border-slate-200 shadow-sm dark:border-slate-700"
-                        style={{ backgroundColor: hex }}
-                        aria-label={`Background ${hex}`}
-                      />
-                    ),
-                  )}
-                </div>
-              </div>
+              <BackgroundPanel 
+                editor={editor} 
+                onUpload={assetBrowser?.onUploadBackground}
+                uploading={assetBrowser?.uploading}
+              />
             )}
 
             {active === 'layers' && <LayersPanel editor={editor} layers={layers} />}

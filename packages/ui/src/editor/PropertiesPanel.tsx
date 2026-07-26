@@ -339,23 +339,106 @@ export function PropertiesPanel({
               value={obj.stroke ?? '#000000'}
               onChange={(stroke) => set({ stroke })}
             />
-            <div className="grid grid-cols-2 gap-2">
-              <NumberField
-                label="Str"
-                value={obj.strokeWidth ?? 0}
-                min={0}
-                max={200}
-                onChange={(strokeWidth) => set({ strokeWidth })}
-              />
               {obj.type === 'rect' && (
-                <NumberField
-                  label="Rad"
-                  value={obj.rx ?? 0}
-                  min={0}
-                  onChange={(rx) => set({ rx, ry: rx } as Partial<ObjectSnapshot>)}
-                />
+                <div className="w-1/2 pr-1">
+                  <NumberField
+                    label="Rad"
+                    value={obj.rx ?? 0}
+                    min={0}
+                    onChange={(rx) => set({ rx, ry: rx } as Partial<ObjectSnapshot>)}
+                  />
+                </div>
               )}
+
+            <div className="pt-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-[11px] font-secondary tracking-[0.2em] uppercase text-[#6B6B6B]">Border Thickness</Label>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={obj.strokeWidth ?? 1}
+                    onChange={(e) => set({ strokeWidth: Number(e.target.value) })}
+                    className="h-7 w-12 rounded-lg border border-[#E7DDD6] bg-white text-center text-xs font-medium focus:border-[#C5A572] focus:outline-none focus:ring-1 focus:ring-[#C5A572]/20 shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <span className="text-[10px] text-[#6B6B6B] font-medium">px</span>
+                </div>
+              </div>
+              
+              <Slider
+                value={[obj.strokeWidth ?? 1]}
+                min={1}
+                max={50}
+                step={1}
+                onValueChange={([val]) => set({ strokeWidth: val })}
+                className="w-full"
+              />
+              
+              <div className="grid grid-cols-4 gap-1.5 pt-1">
+                {[
+                  { label: 'Thin', val: 2 },
+                  { label: 'Medium', val: 4 },
+                  { label: 'Bold', val: 8 },
+                  { label: 'Extra', val: 12 },
+                ].map((preset) => (
+                  <button
+                    key={preset.val}
+                    onClick={() => set({ strokeWidth: preset.val })}
+                    className={cn(
+                      "flex flex-col items-center justify-center py-1.5 rounded-lg border transition-all duration-200",
+                      obj.strokeWidth === preset.val
+                        ? "border-[#C5A572] bg-[#F8F4EF] shadow-sm text-[#1F1F1F]"
+                        : "border-[#E7DDD6] bg-white/60 hover:bg-white hover:border-[#D0C2AE] text-[#6B6B6B]"
+                    )}
+                  >
+                    <div 
+                      className="w-4 bg-current rounded-full mb-1" 
+                      style={{ height: preset.val > 6 ? 4 : Math.max(1, preset.val / 2) }} 
+                    />
+                    <span className="text-[9px] font-semibold">{preset.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {obj.roohAssetType === 'border' && isAdmin && (
+              <div className="pt-2 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-[11px] font-secondary tracking-[0.2em] uppercase text-[#6B6B6B]">Margin / Padding</Label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={obj.roohBorderPadding ?? 0}
+                      onChange={(e) => set({ roohBorderPadding: Number(e.target.value) })}
+                      className="h-7 w-12 rounded-lg border border-[#E7DDD6] bg-white text-center text-xs font-medium focus:border-[#C5A572] focus:outline-none focus:ring-1 focus:ring-[#C5A572]/20 shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="text-[10px] text-[#6B6B6B] font-medium">px</span>
+                  </div>
+                </div>
+                <Slider
+                  value={[obj.roohBorderPadding ?? 0]}
+                  min={0}
+                  max={100}
+                  step={1}
+                  onValueChange={([val]) => set({ roohBorderPadding: val })}
+                  className="w-full"
+                />
+              </div>
+            )}
+
+            {(obj.roohAssetType === 'line' || obj.roohAssetType === 'border') && (
+              <div className="pt-2">
+                <Label className="text-[11px] font-secondary tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 block">Dash Pattern</Label>
+                <div className="flex gap-2">
+                  <Button variant={!obj.strokeDashArray ? 'primary' : 'outline'} size="sm" onClick={() => set({ strokeDashArray: null } as any)}>Solid</Button>
+                  <Button variant={obj.strokeDashArray?.join(',') === '5,5' ? 'primary' : 'outline'} size="sm" onClick={() => set({ strokeDashArray: [5, 5] } as any)}>Dashed</Button>
+                  <Button variant={obj.strokeDashArray?.join(',') === '2,4' ? 'primary' : 'outline'} size="sm" onClick={() => set({ strokeDashArray: [2, 4] } as any)}>Dotted</Button>
+                </div>
+              </div>
+            )}
           </section>
         )}
 

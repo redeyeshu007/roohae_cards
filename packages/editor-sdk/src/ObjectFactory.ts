@@ -7,6 +7,8 @@ import {
   Rect,
   Textbox,
   Triangle,
+  loadSVGFromURL,
+  util,
   type FabricObject,
 } from 'fabric';
 import { defaultName, newObjectId } from './serialization';
@@ -120,5 +122,29 @@ export class ObjectFactory {
     const scale = Math.min(1, maxSize / Math.max(image.width ?? 1, image.height ?? 1));
     image.set({ scaleX: scale, scaleY: scale, assetId });
     return brand(image, defaultName('image'));
+  }
+
+  async createSvg(url: string, type: 'border' | 'line', maxSize: number): Promise<FabricObject> {
+    const { objects, options } = await loadSVGFromURL(url);
+    const validObjects = objects.filter((o): o is FabricObject => o !== null);
+    
+    // Slightly reduce border/line boldness by scaling down the stroke width
+    if (type === 'border' || type === 'line') {
+      validObjects.forEach((obj) => {
+        if (obj.strokeWidth !== undefined) {
+          obj.strokeWidth = Math.max(0.2, obj.strokeWidth * 0.25);
+        }
+      });
+    }
+    
+    const svgObj = util.groupSVGElements(validObjects, options);
+    
+    // Scale SVG to fit canvas
+    const scale = Math.min(1, maxSize / Math.max(svgObj.width ?? 1, svgObj.height ?? 1));
+    svgObj.set({ scaleX: scale, scaleY: scale });
+    
+    const name = type === 'border' ? 'Border' : 'Line';
+    
+    return brand(svgObj, defaultName(name));
   }
 }

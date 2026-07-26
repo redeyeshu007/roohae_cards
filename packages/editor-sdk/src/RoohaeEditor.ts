@@ -6,6 +6,7 @@ import {
   Shadow,
   Textbox,
   FabricObject,
+  filters,
 } from 'fabric';
 import type { DesignDocument, DesignPage } from '@roohae/shared';
 import { Emitter } from './emitter';
@@ -81,7 +82,7 @@ export class RoohaeEditor {
       selectionColor: 'rgba(139, 92, 246, 0.1)',
       selectionBorderColor: '#8B5CF6',
       selectionLineWidth: 1,
-      stopContextMenu: true,
+      stopContextMenu: false,
     });
     this.canvas.setDimensions({ width: this.doc.width, height: this.doc.height });
     this.bindCanvasEvents();
@@ -138,7 +139,9 @@ export class RoohaeEditor {
     const emitSelection = () => this.emitter.emit('selection:change', this.getSelection());
     this.canvas.on('selection:created', emitSelection);
     this.canvas.on('selection:updated', emitSelection);
-    this.canvas.on('selection:cleared', emitSelection);
+    this.canvas.on('selection:cleared', () => {
+      emitSelection();
+    });
   }
 
   /** Sync canvas → document, push history, notify listeners. */
@@ -203,7 +206,7 @@ export class RoohaeEditor {
       for (const obj of this.canvas.getObjects()) {
         this.applyInteractivity(obj as Rooh);
       }
-      this.canvas.backgroundColor = page.background;
+      await this.applyBackgroundToCanvas(page);
       this.canvas.requestRenderAll();
       this.history.reset(page);
     } catch (err) {
@@ -254,6 +257,16 @@ export class RoohaeEditor {
     obj.lockRotation = locked;
     obj.hasControls = !locked;
     if (obj instanceof Textbox) obj.editable = !(obj as Rooh).locked;
+
+    if (obj.get('roohAssetType') === 'border') {
+      obj.selectable = true;
+      obj.evented = true;
+      obj.hasControls = false;
+      obj.hasBorders = true;
+      obj.lockMovementX = true;
+      obj.lockMovementY = true;
+      obj.perPixelTargetFind = true;
+    }
   }
 
   getPages(): PageEntry[] {
@@ -351,7 +364,6 @@ export class RoohaeEditor {
   }
 
   setPageBackground(color: string): void {
-    if (this.mode === 'user') return;
     this.canvas.backgroundColor = color;
     this.canvas.requestRenderAll();
     this.commit();
@@ -359,6 +371,113 @@ export class RoohaeEditor {
 
   getPageBackground(): string {
     return String(this.canvas.backgroundColor ?? '#ffffff');
+  }
+
+  async setPageBackgroundAsset(assetId: string, url: string): Promise<void> {
+    const page = this.activePage();
+    page.backgroundAssetId = assetId;
+    page.backgroundImageSettings = page.backgroundImageSettings ?? {
+      fit: 'fill',
+      opacity: 100,
+      blur: 0,
+    };
+    await this.applyBackgroundToCanvas(page);
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  async setPageBackgroundImageSettings(
+    settings: Partial<NonNullable<DesignPage['backgroundImageSettings']>>,
+  ): Promise<void> {
+    const page = this.activePage();
+    if (!page.backgroundAssetId) return;
+    page.backgroundImageSettings = {
+      ...(page.backgroundImageSettings ?? { fit: 'fill', opacity: 100, blur: 0 }),
+      ...settings,
+    };
+    await this.applyBackgroundToCanvas(page);
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  async removePageBackgroundImage(): Promise<void> {
+    const page = this.activePage();
+    page.backgroundAssetId = undefined;
+    page.backgroundImageSettings = undefined;
+    await this.applyBackgroundToCanvas(page);
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  private async applyBackgroundToCanvas(page: DesignPage): Promise<void> {
+    this.canvas.backgroundColor = page.background;
+    if (!page.backgroundAssetId) {
+      this.canvas.backgroundImage = undefined;
+      return;
+    }
+    const url = this.resolveAsset(page.backgroundAssetId);
+    if (!url) {
+      this.canvas.backgroundImage = undefined;
+      return;
+    }
+    try {
+      const img = await FabricImage.fromURL(url, { crossOrigin: 'anonymous' });
+      if (this.disposed) return;
+      const settings = page.backgroundImageSettings ?? { fit: 'fill', opacity: 100, blur: 0 };
+      
+      img.set({ opacity: settings.opacity / 100 });
+      
+      if (settings.blur > 0) {
+        img.filters.push(new filters.Blur({ blur: settings.blur / 20 }));
+        img.applyFilters();
+      }
+
+      const canvasWidth = this.doc.width;
+      const canvasHeight = this.doc.height;
+      const imgWidth = img.width || 1;
+      const imgHeight = img.height || 1;
+      
+      let scaleX = 1;
+      let scaleY = 1;
+
+      switch (settings.fit) {
+        case 'fit': {
+          const scale = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
+          scaleX = scale;
+          scaleY = scale;
+          break;
+        }
+        case 'fill': {
+          const scale = Math.max(canvasWidth / imgWidth, canvasHeight / imgHeight);
+          scaleX = scale;
+          scaleY = scale;
+          break;
+        }
+        case 'stretch': {
+          scaleX = canvasWidth / imgWidth;
+          scaleY = canvasHeight / imgHeight;
+          break;
+        }
+        case 'center':
+        case 'tile': {
+          break;
+        }
+      }
+      
+      img.set({ 
+        scaleX, 
+        scaleY, 
+        originX: 'center', 
+        originY: 'center', 
+        left: canvasWidth / 2, 
+        top: canvasHeight / 2,
+        angle: settings.rotation ?? 0
+      });
+      this.canvas.backgroundImage = img;
+    } catch (e) {
+      console.error('Failed to load background image', e);
+      this.canvas.backgroundImage = undefined;
+    }
   }
 
   // -------------------------------------------------------------- objects
@@ -391,6 +510,41 @@ export class RoohaeEditor {
     if (!src) throw new Error(`Cannot resolve asset ${assetId}`);
     const image = await this.factory.createImage(src, assetId, Math.round(this.doc.width * 0.8));
     this.centerAndAdd(image);
+  }
+
+  async addSvgAsset(url: string, type: 'border' | 'line'): Promise<void> {
+    if (this.mode === 'user') return;
+    const svgObj = await this.factory.createSvg(url, type, Math.round(this.doc.width * 0.8));
+    svgObj.set('roohAssetType', type);
+    
+    if (type === 'border') {
+      const margin = 0;
+      const scaleX = (this.doc.width - margin * 2) / (svgObj.width || 1);
+      const scaleY = (this.doc.height - margin * 2) / (svgObj.height || 1);
+      
+      svgObj.set({
+        left: this.doc.width / 2,
+        top: this.doc.height / 2,
+        originX: 'center',
+        originY: 'center',
+        scaleX,
+        scaleY,
+        evented: true,
+        selectable: true,
+        hasControls: false,
+        hasBorders: true,
+        lockMovementX: true,
+        lockMovementY: true,
+        perPixelTargetFind: true,
+        roohBorderPadding: margin
+      });
+      
+      // Insert border at index 0 (behind everything but above background)
+      this.canvas.insertAt(0, svgObj);
+      this.canvas.requestRenderAll();
+    } else {
+      this.centerAndAdd(svgObj);
+    }
   }
 
   /**
@@ -569,7 +723,10 @@ export class RoohaeEditor {
       fill: typeof obj.fill === 'string' ? obj.fill : undefined,
       stroke: typeof obj.stroke === 'string' ? obj.stroke : undefined,
       strokeWidth: obj.strokeWidth,
+      strokeDashArray: obj.strokeDashArray,
       rx: (obj as { rx?: number }).rx,
+      roohAssetType: obj.get('roohAssetType'),
+      roohBorderPadding: obj.get('roohBorderPadding') ?? 0,
       text: text?.text,
       fontFamily: text?.fontFamily,
       fontSize: text?.fontSize,
@@ -637,7 +794,28 @@ export class RoohaeEditor {
       }
 
       const clean = Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined));
+      
+      if (clean.roohBorderPadding !== undefined && obj.get('roohAssetType') === 'border') {
+        const padding = Number(clean.roohBorderPadding);
+        obj.set({ roohBorderPadding: padding });
+        const scaleX = (this.doc.width - padding * 2) / (obj.width || 1);
+        const scaleY = (this.doc.height - padding * 2) / (obj.height || 1);
+        obj.set({ scaleX, scaleY });
+        delete clean.roohBorderPadding; // handeled
+      }
+      
       obj.set(clean);
+      
+      if (obj.get('roohAssetType') && obj.isType('Group')) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (obj as any)._objects?.forEach((child: any) => {
+          if (clean.stroke !== undefined) child.set({ stroke: clean.stroke });
+          if (clean.fill !== undefined) child.set({ fill: clean.fill });
+          if (clean.strokeWidth !== undefined) child.set({ strokeWidth: clean.strokeWidth });
+          if (clean.strokeDashArray !== undefined) child.set({ strokeDashArray: clean.strokeDashArray });
+        });
+      }
+      
       obj.setCoords();
     }
 
@@ -676,7 +854,27 @@ export class RoohaeEditor {
 
     if (this.mode === 'admin') {
       const clean = Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined));
+      
+      if (clean.roohBorderPadding !== undefined && obj.get('roohAssetType') === 'border') {
+        const padding = Number(clean.roohBorderPadding);
+        obj.set({ roohBorderPadding: padding });
+        const scaleX = (this.doc.width - padding * 2) / (obj.width || 1);
+        const scaleY = (this.doc.height - padding * 2) / (obj.height || 1);
+        obj.set({ scaleX, scaleY });
+        delete clean.roohBorderPadding; // handeled
+      }
+      
       obj.set(clean);
+      
+      if (obj.get('roohAssetType') && obj.isType('Group')) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (obj as any)._objects?.forEach((child: any) => {
+          if (clean.stroke !== undefined) child.set({ stroke: clean.stroke });
+          if (clean.fill !== undefined) child.set({ fill: clean.fill });
+          if (clean.strokeWidth !== undefined) child.set({ strokeWidth: clean.strokeWidth });
+          if (clean.strokeDashArray !== undefined) child.set({ strokeDashArray: clean.strokeDashArray });
+        });
+      }
     }
 
     obj.setCoords();
@@ -689,7 +887,13 @@ export class RoohaeEditor {
 
   selectObject(id: string): void {
     const obj = (this.canvas.getObjects() as Rooh[]).find((o) => o.id === id);
-    if (!obj || !obj.selectable) return;
+    if (!obj) return;
+    
+    // Borders are selectable directly now, just check if it's locked
+    if (!obj.selectable) {
+      return;
+    }
+    
     this.canvas.setActiveObject(obj);
     this.canvas.requestRenderAll();
     this.emitter.emit('selection:change', this.getSelection());
@@ -758,37 +962,7 @@ export class RoohaeEditor {
     });
   }
 
-  bringForward(): void {
-    if (this.mode === 'user') return;
-    const obj = this.canvas.getActiveObject();
-    if (!obj) return;
-    this.canvas.bringObjectForward(obj);
-    this.commit();
-  }
 
-  sendBackward(): void {
-    if (this.mode === 'user') return;
-    const obj = this.canvas.getActiveObject();
-    if (!obj) return;
-    this.canvas.sendObjectBackwards(obj);
-    this.commit();
-  }
-
-  bringToFront(): void {
-    if (this.mode === 'user') return;
-    const obj = this.canvas.getActiveObject();
-    if (!obj) return;
-    this.canvas.bringObjectToFront(obj);
-    this.commit();
-  }
-
-  sendToBack(): void {
-    if (this.mode === 'user') return;
-    const obj = this.canvas.getActiveObject();
-    if (!obj) return;
-    this.canvas.sendObjectToBack(obj);
-    this.commit();
-  }
 
   group(): void {
     if (this.mode === 'user') return;
@@ -908,7 +1082,7 @@ export class RoohaeEditor {
       await this.canvas.loadFromJSON(json);
       if (this.disposed) return;
       for (const obj of this.canvas.getObjects()) this.applyInteractivity(obj as Rooh);
-      this.canvas.backgroundColor = page.background;
+      await this.applyBackgroundToCanvas(page);
       this.canvas.requestRenderAll();
     } catch (err) {
       if (this.disposed) return;
@@ -938,5 +1112,163 @@ export class RoohaeEditor {
 
   getDimensions(): { width: number; height: number } {
     return { width: this.doc.width, height: this.doc.height };
+  }
+
+  setDocumentSize(width: number, height: number): void {
+    this.doc.width = width;
+    this.doc.height = height;
+    
+    this.canvas.setDimensions({
+      width: width * this.zoom,
+      height: height * this.zoom,
+    });
+    
+    this.canvas.getObjects().forEach((obj) => {
+      if (obj.get('roohAssetType') === 'border') {
+        const margin = obj.get('roohBorderPadding') ?? 0;
+        const scaleX = (width - margin * 2) / (obj.width || 1);
+        const scaleY = (height - margin * 2) / (obj.height || 1);
+        obj.set({
+          left: width / 2,
+          top: height / 2,
+          scaleX,
+          scaleY
+        });
+        obj.setCoords();
+      }
+    });
+    
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+  // -------------------------------------------------------------- context menu operations
+
+  bringToFront(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    for (const obj of active) {
+      if (obj.get('roohAssetType') === 'border') continue;
+      this.canvas.bringObjectToFront(obj);
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  bringForward(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    for (const obj of active) {
+      if (obj.get('roohAssetType') === 'border') continue;
+      this.canvas.bringObjectForward(obj);
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  sendBackward(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    const borderCount = this.canvas.getObjects().filter((o) => o.get('roohAssetType') === 'border').length;
+    for (const obj of active) {
+      const idx = this.canvas.getObjects().indexOf(obj);
+      if (idx > borderCount) {
+        this.canvas.sendObjectBackwards(obj);
+      }
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  sendToBack(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    const borderCount = this.canvas.getObjects().filter((o) => o.get('roohAssetType') === 'border').length;
+    for (const obj of active) {
+      if (obj.get('roohAssetType') === 'border') {
+        this.canvas.sendObjectToBack(obj);
+      } else {
+        this.canvas.moveObjectTo(obj, borderCount);
+      }
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  flipHorizontal(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    for (const obj of active) {
+      obj.set('flipX', !obj.flipX);
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  flipVertical(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    for (const obj of active) {
+      obj.set('flipY', !obj.flipY);
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  rotateSelection(angle: number): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    for (const obj of active) {
+      obj.set('angle', (obj.angle || 0) + angle);
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  resetRotation(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    for (const obj of active) {
+      obj.set('angle', 0);
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  lock(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    for (const obj of active) {
+      (obj as Rooh).locked = true;
+      this.applyInteractivity(obj as Rooh);
+    }
+    this.canvas.discardActiveObject();
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  unlock(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObjects();
+    for (const obj of active) {
+      (obj as Rooh).locked = false;
+      this.applyInteractivity(obj as Rooh);
+    }
+    this.canvas.requestRenderAll();
+    this.commit();
+  }
+
+  centerOnPage(): void {
+    if (this.mode === 'user') return;
+    const active = this.canvas.getActiveObject();
+    if (!active) return;
+    active.set({
+      left: this.doc.width / 2,
+      top: this.doc.height / 2,
+      originX: 'center',
+      originY: 'center',
+    });
+    active.setCoords();
+    this.canvas.requestRenderAll();
+    this.commit();
   }
 }

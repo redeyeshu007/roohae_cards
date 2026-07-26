@@ -73,7 +73,13 @@ export function pageToFabricJSON(
     }
     return runtime;
   });
-  return { version: '6.0.0', background: page.background, objects };
+  return {
+    version: '6.0.0',
+    background: page.background,
+    backgroundAssetId: page.backgroundAssetId,
+    backgroundImageSettings: page.backgroundImageSettings,
+    objects,
+  };
 }
 
 export function defaultName(type: string): string {

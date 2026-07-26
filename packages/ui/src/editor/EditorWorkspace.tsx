@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { DesignDocument, Font } from '@roohae/shared';
 import { loadFonts, type EditorMode, type RoohaeEditor } from '@roohae/editor-sdk';
 import { useRoohaeEditor } from '@roohae/editor-sdk';
@@ -9,6 +9,7 @@ import { EditorTopBar, type SaveStatus } from './TopBar';
 import { EditorLeftSidebar, type AssetBrowserProps, type SidebarSection } from './LeftSidebar';
 import { PropertiesPanel } from './PropertiesPanel';
 import { PagesBar } from './PagesBar';
+import { ContextMenu } from './ContextMenu';
 import type { PlaceholderBrowserProps } from './PlaceholdersPanel';
 
 export interface EditorWorkspaceProps {
@@ -38,6 +39,7 @@ export interface EditorWorkspaceProps {
  */
 export function EditorWorkspace(props: EditorWorkspaceProps) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; isOpen: boolean }>({ x: 0, y: 0, isOpen: false });
 
   const {
     canvasRef,
@@ -100,6 +102,17 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
       } else if (mod && e.key === '-') {
         e.preventDefault();
         editor.zoomOut();
+      } else if (mod && e.key === ']') {
+        e.preventDefault();
+        if (e.altKey) editor.bringForward();
+        else editor.bringToFront();
+      } else if (mod && e.key === '[') {
+        e.preventDefault();
+        if (e.altKey) editor.sendBackward();
+        else editor.sendToBack();
+      } else if (mod && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        editor.lock();
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -146,7 +159,12 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
             backgroundSize: '24px 24px'
           }}
         >
-          <div className="p-10 relative z-10">
+          <div className="p-10 relative z-10" onContextMenu={(e) => {
+            e.preventDefault();
+            if (selection.count > 0) {
+              setContextMenu({ x: e.clientX, y: e.clientY, isOpen: true });
+            }
+          }}>
             {!ready && (
               <div className="absolute inset-10">
                 <Skeleton className="h-full w-full" />
@@ -177,6 +195,15 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
         pages={pages}
         zoom={zoom}
         allowPageManagement={props.mode === 'admin'}
+      />
+      
+      <ContextMenu 
+        x={contextMenu.x} 
+        y={contextMenu.y} 
+        isOpen={contextMenu.isOpen} 
+        onClose={() => setContextMenu(prev => ({ ...prev, isOpen: false }))} 
+        editor={editor}
+        selection={selection}
       />
     </div>
   );

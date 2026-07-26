@@ -51,6 +51,12 @@ export interface DesignPage {
   background: string;
   /** Optional background image asset. */
   backgroundAssetId?: string;
+  backgroundImageSettings?: {
+    fit: 'fit' | 'fill' | 'stretch' | 'center' | 'tile';
+    opacity: number;
+    blur: number;
+    rotation?: number;
+  };
   /** Original PDF document asset used to generate this page, when imported. */
   sourcePdfAssetId?: string;
   /** 1-based page number inside the original PDF, when imported. */

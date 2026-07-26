@@ -1,4 +1,4 @@
-import { StaticCanvas } from 'fabric';
+import { StaticCanvas, FabricImage, filters } from 'fabric';
 import { PDFDocument } from 'pdf-lib';
 import type { DesignDocument, DesignPage } from '@roohae/shared';
 import { pageToFabricJSON } from './serialization';
@@ -42,7 +42,63 @@ export class ExportService {
     });
     try {
       await canvas.loadFromJSON(pageToFabricJSON(page, this.resolveAsset));
+      
+      // Explicitly apply background (same logic as RoohaeEditor)
       canvas.backgroundColor = page.background;
+      if (page.backgroundAssetId) {
+        const url = this.resolveAsset(page.backgroundAssetId);
+        if (url) {
+          const img = await FabricImage.fromURL(url, { crossOrigin: 'anonymous' });
+          const settings = page.backgroundImageSettings ?? { fit: 'fill', opacity: 100, blur: 0 };
+          
+          img.set({ opacity: settings.opacity / 100 });
+          
+          if (settings.blur > 0) {
+            img.filters.push(new filters.Blur({ blur: settings.blur / 20 }));
+            img.applyFilters();
+          }
+
+          const canvasWidth = doc.width;
+          const canvasHeight = doc.height;
+          const imgWidth = img.width || 1;
+          const imgHeight = img.height || 1;
+          
+          let scaleX = 1;
+          let scaleY = 1;
+
+          switch (settings.fit) {
+            case 'fit': {
+              const scale = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
+              scaleX = scale;
+              scaleY = scale;
+              break;
+            }
+            case 'fill': {
+              const scale = Math.max(canvasWidth / imgWidth, canvasHeight / imgHeight);
+              scaleX = scale;
+              scaleY = scale;
+              break;
+            }
+            case 'stretch': {
+              scaleX = canvasWidth / imgWidth;
+              scaleY = canvasHeight / imgHeight;
+              break;
+            }
+          }
+
+          img.set({
+            scaleX,
+            scaleY,
+            originX: 'center',
+            originY: 'center',
+            left: canvasWidth / 2,
+            top: canvasHeight / 2,
+          });
+          
+          canvas.backgroundImage = img;
+        }
+      }
+
       canvas.renderAll();
       return canvas.toDataURL({ format, quality: 1, multiplier: scale });
     } finally {

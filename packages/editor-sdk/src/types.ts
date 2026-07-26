@@ -41,7 +41,10 @@ export interface ObjectSnapshot {
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
+  strokeDashArray?: number[] | null;
   rx?: number;
+  roohAssetType?: string;
+  roohBorderPadding?: number;
   // text-specific
   text?: string;
   fontFamily?: string;

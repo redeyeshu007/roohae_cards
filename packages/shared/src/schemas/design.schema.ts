@@ -21,6 +21,12 @@ export const designPageSchema = z.object({
   name: z.string().min(1).max(60),
   background: z.string().default('#ffffff'),
   backgroundAssetId: z.string().optional(),
+  backgroundImageSettings: z.object({
+    fit: z.enum(['fit', 'fill', 'stretch', 'center', 'tile']),
+    opacity: z.number().min(0).max(100),
+    blur: z.number().min(0).max(100),
+    rotation: z.number().optional(),
+  }).optional(),
   sourcePdfAssetId: z.string().optional(),
   sourcePdfPageNumber: z.number().int().positive().optional(),
   sourcePdfPreview: z

@@ -229,7 +229,7 @@ export default function TemplateEditorPage({
         editorRef.current = editor;
       }}
       saveStatus={saveStatus}
-      sidebarSections={['text', 'shapes', 'images', 'background', 'layers']}
+      sidebarSections={['text', 'shapes', 'images', 'tools', 'background', 'layers']}
       assetBrowser={{
         // MIME-based: only raster images and SVG icons are insertable —
         // a PDF/MP3/MP4 can never appear in the editor's image grid.
@@ -237,6 +237,13 @@ export default function TemplateEditorPage({
         loading: assetsLoading,
         onSearch: setAssetSearch,
         onUpload: (files) => uploadMutation.mutate({ files }),
+        onUploadBackground: async (file) => {
+          const assets = await uploadMutation.mutateAsync({ files: [file] });
+          const first = assets[0]!;
+          // Update the local resolved assets map so the canvas can load it immediately
+          assetMapRef.current.set(first.id, first.url);
+          return { id: first.id, url: first.url };
+        },
         uploading: uploadMutation.isPending,
         kind: assetKind,
         onKindChange: setAssetKind,
