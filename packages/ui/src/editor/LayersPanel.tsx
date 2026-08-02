@@ -28,9 +28,9 @@ export function LayersPanel({
 
   return (
     <ul className="space-y-1">
-      {layers.map((layer) => (
+      {layers.map((layer, index) => (
         <li
-          key={layer.id}
+          key={layer.id || `layer-${index}`}
           className={cn(
             'group flex items-center gap-2 rounded-xl border px-2.5 py-2 text-sm transition-colors',
             layer.selected

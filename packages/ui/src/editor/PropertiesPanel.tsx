@@ -116,9 +116,45 @@ export function PropertiesPanel({
     return null;
   }
 
-  const set = (props: Partial<ObjectSnapshot>) => editor.updateSelection(props);
+  const isMulti = selection.count > 1;
+  const isImage = obj?.type === 'image';
   const isText = obj?.type === 'textbox' || obj?.type === 'i-text';
-  const isShape = obj && !isText && obj.type !== 'image';
+  const isGroup = obj?.type === 'group';
+  const isDraw = !!obj && (obj.roohAssetType === 'draw' || obj.roohAssetType === 'pen' || obj.roohAssetType === 'signature');
+  const activeTool = editor.toolManager.getActiveToolId();
+  const isDrawTool = activeTool?.startsWith('draw-');
+  const isDrawingMode = isDrawTool || activeTool === 'pen' || activeTool === 'signature';
+
+  // Handle setting active drawing config if in draw mode
+  function setDrawConfig(config: any) {
+    if (isDrawTool && editor) {
+      const engine = (editor as any).toolManager.tools.get(activeTool);
+      if (engine && engine.updateProperties) {
+        engine.updateProperties(config);
+      }
+    } else if (obj) {
+      set(config);
+    }
+  }
+
+  // Get current draw config values from either selected object or engine
+  const currentDrawConfig = (() => {
+    if (obj && isDraw) return obj;
+    if (isDrawingMode && isDrawTool) {
+      const engine = (editor as any).toolManager.tools.get(activeTool);
+      return engine?.getConfig?.() || { color: '#000000', thickness: 5, opacity: 1 };
+    }
+    return {};
+  })();
+
+  const allowOpacity =
+    !isMulti &&
+    !editor.document.pages.map((p: any) => p.id).includes(selection.ids[0] ?? '') &&
+    (isImage || isText || isGroup || isDraw);
+
+  const set = (props: Partial<ObjectSnapshot>) => editor.updateSelection(props);
+  const isTextObj = obj?.type === 'textbox' || obj?.type === 'i-text';
+  const isShape = obj && !isTextObj && obj.type !== 'image';
   const fontFamilies = [...fonts.map((f) => f.family), ...FONT_FALLBACKS];
 
   return (
@@ -224,6 +260,180 @@ export function PropertiesPanel({
               </>
             )}
           </div>
+        )}
+
+        {/* Sticky Note controls */}
+        {!!obj && (obj as any).roohAssetType === 'sticky' && (() => {
+          const textObj = obj as any;
+          return (
+            <section className="space-y-4">
+              <Label className="text-[11px] font-secondary tracking-[0.2em] uppercase text-[#6B6B6B]">Sticky Note Options</Label>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Note Text</Label>
+                <textarea
+                  value={textObj?.text || ''}
+                  onChange={(e) => {
+                    set({ text: e.target.value });
+                  }}
+                  placeholder="Type your note here..."
+                  rows={3}
+                  className="w-full rounded-xl border border-[#E7DDD6] bg-[#FFFDF9] p-2.5 text-xs text-[#1F1F1F] focus:border-[#C5A572] focus:outline-none focus:ring-2 focus:ring-[#C5A572]/20 transition-all resize-none font-sans"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Note Color</Label>
+                <ColorField
+                  value={textObj.backgroundColor || '#fef08a'}
+                  onChange={(color) => {
+                    set({ backgroundColor: color });
+                  }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Text Color</Label>
+                <ColorField
+                  value={textObj.fill || '#000000'}
+                  onChange={(fill) => {
+                    set({ fill });
+                  }}
+                />
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* Draw controls */}
+        {(isDraw || isDrawingMode) && (
+          <section className="space-y-4">
+            <Label className="text-[11px] font-secondary tracking-[0.2em] uppercase text-[#6B6B6B]">Draw Options</Label>
+            
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <ColorField value={currentDrawConfig.color || currentDrawConfig.fill || currentDrawConfig.stroke || '#000000'} onChange={(color) => setDrawConfig({ color, stroke: color, fill: '' })} />
+                <Label className="text-sm font-medium">Color</Label>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Thickness</Label>
+                <div className="flex items-center gap-3">
+                  <Slider
+                    value={[currentDrawConfig.thickness || currentDrawConfig.strokeWidth || 5]}
+                    min={1}
+                    max={100}
+                    step={1}
+                    onValueChange={([val]) => val !== undefined && setDrawConfig({ thickness: val, strokeWidth: val })}
+                    className="flex-1"
+                  />
+                  <span className="text-xs w-8 text-right tabular-nums text-slate-500">
+                    {currentDrawConfig.thickness || currentDrawConfig.strokeWidth || 5}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Opacity</Label>
+                <div className="flex items-center gap-3">
+                  <Slider
+                    value={[(currentDrawConfig.opacity ?? 1) * 100]}
+                    min={1}
+                    max={100}
+                    step={1}
+                    onValueChange={([val]) => val !== undefined && setDrawConfig({ opacity: val / 100 })}
+                    className="flex-1"
+                  />
+                  <span className="text-xs w-8 text-right tabular-nums text-slate-500">
+                    {Math.round((currentDrawConfig.opacity ?? 1) * 100)}%
+                  </span>
+                </div>
+              </div>
+              {/* Engine-specific controls */}
+              {(() => {
+                const drawStyle = isDrawingMode ? activeTool : (obj as any)?.roohDrawStyle;
+
+                return (
+                  <>
+                    {(drawStyle === 'draw-spray' || drawStyle === 'draw-chalk') && (
+                      <div className="space-y-2 mt-2">
+                        <Label className="text-sm font-medium">Density</Label>
+                        <div className="flex items-center gap-3">
+                          <Slider
+                            value={[currentDrawConfig.density || 50]}
+                            min={1}
+                            max={200}
+                            step={1}
+                            onValueChange={([val]) => val !== undefined && setDrawConfig({ density: val })}
+                            className="flex-1"
+                          />
+                          <span className="text-xs w-8 text-right tabular-nums text-slate-500">
+                            {currentDrawConfig.density || 50}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {drawStyle === 'draw-spray' && (
+                      <>
+                        <div className="space-y-2 mt-2">
+                          <Label className="text-sm font-medium">Scatter</Label>
+                          <div className="flex items-center gap-3">
+                            <Slider
+                              value={[currentDrawConfig.scatter || 1]}
+                              min={0.1}
+                              max={3.0}
+                              step={0.1}
+                              onValueChange={([val]) => val !== undefined && setDrawConfig({ scatter: val })}
+                              className="flex-1"
+                            />
+                            <span className="text-xs w-8 text-right tabular-nums text-slate-500">
+                              {currentDrawConfig.scatter || 1}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="space-y-2 mt-2">
+                          <Label className="text-sm font-medium">Particle Size</Label>
+                          <div className="flex items-center gap-3">
+                            <Slider
+                              value={[currentDrawConfig.particleSize || 2]}
+                              min={0.5}
+                              max={10}
+                              step={0.5}
+                              onValueChange={([val]) => val !== undefined && setDrawConfig({ particleSize: val })}
+                              className="flex-1"
+                            />
+                            <span className="text-xs w-8 text-right tabular-nums text-slate-500">
+                              {currentDrawConfig.particleSize || 2}
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {drawStyle === 'draw-brush' && (
+                      <div className="space-y-2 mt-2">
+                        <Label className="text-sm font-medium">Flow (Paint Wetness)</Label>
+                        <div className="flex items-center gap-3">
+                          <Slider
+                            value={[(currentDrawConfig.flow ?? 0.5) * 100]}
+                            min={1}
+                            max={100}
+                            step={1}
+                            onValueChange={([val]) => val !== undefined && setDrawConfig({ flow: val / 100 })}
+                            className="flex-1"
+                          />
+                          <span className="text-xs w-8 text-right tabular-nums text-slate-500">
+                            {Math.round((currentDrawConfig.flow ?? 0.5) * 100)}%
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          </section>
         )}
 
         {/* Text controls */}
@@ -394,7 +604,7 @@ export function PropertiesPanel({
                   >
                     <div 
                       className="w-4 bg-current rounded-full mb-1" 
-                      style={{ height: preset.val > 6 ? 4 : Math.max(1, preset.val / 2) }} 
+                      style={{ height: Math.max(1, Math.min(8, preset.val / 2)) }} 
                     />
                     <span className="text-[9px] font-semibold">{preset.label}</span>
                   </button>
@@ -434,8 +644,8 @@ export function PropertiesPanel({
                 <Label className="text-[11px] font-secondary tracking-[0.2em] uppercase text-[#6B6B6B] mb-2 block">Dash Pattern</Label>
                 <div className="flex gap-2">
                   <Button variant={!obj.strokeDashArray ? 'primary' : 'outline'} size="sm" onClick={() => set({ strokeDashArray: null } as any)}>Solid</Button>
-                  <Button variant={obj.strokeDashArray?.join(',') === '5,5' ? 'primary' : 'outline'} size="sm" onClick={() => set({ strokeDashArray: [5, 5] } as any)}>Dashed</Button>
-                  <Button variant={obj.strokeDashArray?.join(',') === '2,4' ? 'primary' : 'outline'} size="sm" onClick={() => set({ strokeDashArray: [2, 4] } as any)}>Dotted</Button>
+                  <Button variant={obj.strokeDashArray?.join(',') === '18,10' ? 'primary' : 'outline'} size="sm" onClick={() => set({ strokeDashArray: [18, 10] } as any)}>Dashed</Button>
+                  <Button variant={obj.strokeDashArray?.join(',') === '0,14' ? 'primary' : 'outline'} size="sm" onClick={() => set({ strokeDashArray: [0, 14] } as any)}>Dotted</Button>
                 </div>
               </div>
             )}

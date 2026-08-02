@@ -6,11 +6,26 @@ import {
   Shadow,
   Textbox,
   FabricObject,
-  filters,
+  filters
 } from 'fabric';
 import type { DesignDocument, DesignPage } from '@roohae/shared';
 import { Emitter } from './emitter';
 import { HistoryManager } from './HistoryManager';
+import { BorderLayerManager } from './BorderLayerManager';
+import { ToolManager } from './tools/common/ToolManager';
+import { PencilEngine } from './tools/draw/PencilEngine';
+import { DrawPenEngine } from './tools/draw/DrawPenEngine';
+import { MarkerEngine } from './tools/draw/MarkerEngine';
+import { HighlighterEngine } from './tools/draw/HighlighterEngine';
+import { BrushEngine } from './tools/draw/BrushEngine';
+import { ChalkEngine } from './tools/draw/ChalkEngine';
+import { SprayEngine } from './tools/draw/SprayEngine';
+import { EraserEngine } from './tools/draw/EraserEngine';
+import { SignatureEngine } from './tools/signature/SignatureEngine';
+import { ShapeFactory, ShapeOptions } from './tools/shapes/ShapeFactory';
+import { StickyEngine, StickyOptions } from './tools/sticky/StickyEngine';
+import { WordArtEngine, WordArtOptions } from './tools/wordart/WordArtEngine';
+import { QRCodeEngine, QRCodeOptions } from './tools/qrcode/QRCodeEngine';
 import { ObjectFactory } from './ObjectFactory';
 import {
   newObjectId,
@@ -61,6 +76,7 @@ export class RoohaeEditor {
   private readonly emitter = new Emitter<EditorEvents>();
   private readonly factory = new ObjectFactory();
   private readonly history = new HistoryManager();
+  public readonly toolManager: ToolManager;
   private readonly mode: EditorOptions['mode'];
   private readonly resolveAsset: EditorOptions['resolveAsset'];
 
@@ -85,6 +101,16 @@ export class RoohaeEditor {
       stopContextMenu: false,
     });
     this.canvas.setDimensions({ width: this.doc.width, height: this.doc.height });
+    this.toolManager = new ToolManager({ canvas: this.canvas, editor: this });
+    this.toolManager.registerTool(new PencilEngine({ canvas: this.canvas, editor: this }));
+    this.toolManager.registerTool(new DrawPenEngine({ canvas: this.canvas, editor: this }));
+    this.toolManager.registerTool(new MarkerEngine({ canvas: this.canvas, editor: this }));
+    this.toolManager.registerTool(new HighlighterEngine({ canvas: this.canvas, editor: this }));
+    this.toolManager.registerTool(new BrushEngine({ canvas: this.canvas, editor: this }));
+    this.toolManager.registerTool(new ChalkEngine({ canvas: this.canvas, editor: this }));
+    this.toolManager.registerTool(new SprayEngine({ canvas: this.canvas, editor: this }));
+    this.toolManager.registerTool(new EraserEngine({ canvas: this.canvas, editor: this }));
+    this.toolManager.registerTool(new SignatureEngine({ canvas: this.canvas, editor: this }));
     this.bindCanvasEvents();
   }
 
@@ -94,6 +120,10 @@ export class RoohaeEditor {
 
   get isDisposed(): boolean {
     return this.disposed;
+  }
+
+  get document(): DesignDocument {
+    return this.doc;
   }
 
   destroy(): void {
@@ -120,6 +150,65 @@ export class RoohaeEditor {
     return this.emitter.on(event, cb);
   }
 
+  // ------------------------------------------------------------------ tools
+
+  insertShape(type: 'rectangle' | 'circle' | 'triangle' | 'star' | 'ellipse' | 'rounded-rectangle', options?: ShapeOptions): void {
+    let shape;
+    switch (type) {
+      case 'rectangle': shape = ShapeFactory.createRectangle(options); break;
+      case 'rounded-rectangle': shape = ShapeFactory.createRoundedRectangle(options); break;
+      case 'circle': shape = ShapeFactory.createCircle(options); break;
+      case 'triangle': shape = ShapeFactory.createTriangle(options); break;
+      case 'ellipse': shape = ShapeFactory.createEllipse(options); break;
+      case 'star': shape = ShapeFactory.createStar(options); break;
+      default: shape = ShapeFactory.createRectangle(options);
+    }
+    this.addAndCenter(shape);
+  }
+
+  addStickyNote(options?: StickyOptions): void {
+    const sticky = StickyEngine.createStickyNote(options);
+    this.addAndCenter(sticky);
+  }
+
+  addWordArt(options?: WordArtOptions): void {
+    const wordArt = WordArtEngine.createWordArt(options);
+    this.addAndCenter(wordArt);
+  }
+
+  addTextSignature(text: string, fontFamily: string, color: string): void {
+    const textbox = new Textbox(text || 'Signature', {
+      fontFamily,
+      fontSize: 80,
+      fill: color,
+      textAlign: 'center',
+      roohAssetType: 'signature',
+      
+      // Standard selection styling matching the rest of the project
+      transparentCorners: false,
+      cornerColor: '#FFFFFF',
+      cornerStrokeColor: '#94A3B8',
+      borderColor: '#8B5CF6',
+      cornerSize: 12,
+      cornerStyle: 'circle',
+      borderScaleFactor: 2.5,
+    } as any);
+
+    this.addAndCenter(textbox);
+  }
+
+  async addQRCode(options?: QRCodeOptions): Promise<void> {
+    const qr = await QRCodeEngine.createQRCode(options);
+    this.addAndCenter(qr);
+  }
+
+  private addAndCenter(obj: FabricObject): void {
+    this.canvas.add(obj);
+    this.canvas.centerObject(obj);
+    this.canvas.setActiveObject(obj);
+    this.commit();
+  }
+
   // ------------------------------------------------------------------ events
 
   private bindCanvasEvents(): void {
@@ -142,10 +231,12 @@ export class RoohaeEditor {
     this.canvas.on('selection:cleared', () => {
       emitSelection();
     });
+
+    // Double-click to edit Sticky Note text on canvas is now handled natively by Fabric's Textbox
   }
 
   /** Sync canvas → document, push history, notify listeners. */
-  private commit(): void {
+  public commit(): void {
     if (this.commitTimer) {
       clearTimeout(this.commitTimer);
       this.commitTimer = undefined;
@@ -199,6 +290,32 @@ export class RoohaeEditor {
       this.activePageIndex = index;
       const page = this.activePage();
       const json = pageToFabricJSON(page, this.resolveAsset);
+      // Strip legacy border system objects and upgrade legacy Rect borders
+      if (json && Array.isArray(json.objects)) {
+        const objects = json.objects as any[];
+        json.objects = objects.filter((o: any) => o.type !== 'RoohBorder');
+        
+        // Upgrade legacy fabric.Rect borders
+        (json.objects as any[]).forEach((o: any) => {
+          if ((o.type === 'rect' || o.type === 'Rect') && o.roohAssetType === 'border') {
+            o.type = 'PageBorder';
+            if (o.strokeWidth && !o.roohBorderThickness) {
+              o.roohBorderThickness = o.strokeWidth;
+              o.strokeWidth = 0;
+            }
+            
+            // Migrate origin to center for perfect symmetric stroke growth
+            if (o.originX === 'left' && o.originY === 'top') {
+              o.originX = 'center';
+              o.originY = 'center';
+              if (o.width && o.height) {
+                o.left = (o.left || 0) + o.width / 2;
+                o.top = (o.top || 0) + o.height / 2;
+              }
+            }
+          }
+        });
+      }
       await this.canvas.loadFromJSON(json);
       // The editor may have been destroyed while assets were loading
       // (StrictMode remount, route change) — bail before touching the canvas.
@@ -226,10 +343,13 @@ export class RoohaeEditor {
     obj.visible = !obj.hidden;
 
     const userLocked = this.mode === 'user' && !obj.roohEditable;
-    if (userLocked) {
-      // Admin marked this object non-editable: fully inert for end users.
+    const isDrawStroke = (obj as any).roohAssetType === 'draw' || !!(obj as any).roohDrawStyle;
+    if (userLocked || isDrawStroke) {
+      // Non-editable or draw strokes: fully non-selectable
       obj.selectable = false;
       obj.evented = false;
+      obj.hasControls = false;
+      obj.hasBorders = false;
       obj.hoverCursor = 'default';
       return;
     }
@@ -504,9 +624,22 @@ export class RoohaeEditor {
     this.centerAndAdd(this.factory.createShape(kind, Math.round(this.doc.width / 3)));
   }
 
+  private getAssetSourceUrl(assetId: string, url?: string): string | undefined {
+    if (url) return url;
+    if (!assetId) return undefined;
+    const isUrl =
+      assetId.startsWith('data:') ||
+      assetId.startsWith('http://') ||
+      assetId.startsWith('https://') ||
+      assetId.startsWith('blob:') ||
+      assetId.startsWith('/');
+    if (isUrl) return assetId;
+    return this.resolveAsset(assetId) ?? assetId;
+  }
+
   async addImage(assetId: string, url?: string): Promise<void> {
     if (this.mode === 'user') return;
-    const src = url ?? this.resolveAsset(assetId);
+    const src = this.getAssetSourceUrl(assetId, url);
     if (!src) throw new Error(`Cannot resolve asset ${assetId}`);
     const image = await this.factory.createImage(src, assetId, Math.round(this.doc.width * 0.8));
     this.centerAndAdd(image);
@@ -514,35 +647,35 @@ export class RoohaeEditor {
 
   async addSvgAsset(url: string, type: 'border' | 'line'): Promise<void> {
     if (this.mode === 'user') return;
-    const svgObj = await this.factory.createSvg(url, type, Math.round(this.doc.width * 0.8));
-    svgObj.set('roohAssetType', type);
     
     if (type === 'border') {
       const margin = 0;
-      const scaleX = (this.doc.width - margin * 2) / (svgObj.width || 1);
-      const scaleY = (this.doc.height - margin * 2) / (svgObj.height || 1);
+      // Extract border style from URL or defaults
+      let dashArray = null;
+      if (url.includes('dashed')) dashArray = [18, 10];
+      if (url.includes('dotted')) dashArray = [0, 14];
       
-      svgObj.set({
-        left: this.doc.width / 2,
-        top: this.doc.height / 2,
-        originX: 'center',
-        originY: 'center',
-        scaleX,
-        scaleY,
-        evented: true,
-        selectable: true,
-        hasControls: false,
-        hasBorders: true,
-        lockMovementX: true,
-        lockMovementY: true,
-        perPixelTargetFind: true,
-        roohBorderPadding: margin
-      });
+      const style = (dashArray && dashArray.length > 0 && dashArray[0] !== undefined) ? (dashArray[0] < 1 ? 'dotted' : 'dashed') : 'solid';
+
+      const border = BorderLayerManager.createBorderLayer(
+        this.doc.width,
+        this.doc.height,
+        {
+          padding: margin,
+          thickness: 2,
+          strokeColor: '#1f2937',
+          opacity: 1,
+          style: style,
+          dashArray: dashArray
+        }
+      );
       
-      // Insert border at index 0 (behind everything but above background)
-      this.canvas.insertAt(0, svgObj);
+      this.canvas.insertAt(0, border);
+      this.canvas.setActiveObject(border);
       this.canvas.requestRenderAll();
     } else {
+      const svgObj = await this.factory.createSvg(url, type, Math.round(this.doc.width * 0.8));
+      svgObj.set('roohAssetType', type);
       this.centerAndAdd(svgObj);
     }
   }
@@ -566,7 +699,7 @@ export class RoohaeEditor {
       throw new Error('This image is locked and cannot be replaced');
     }
 
-    const src = url ?? this.resolveAsset(assetId);
+    const src = this.getAssetSourceUrl(assetId, url);
     if (!src) throw new Error(`Cannot resolve asset ${assetId}`);
 
     // Preserve the on-canvas frame across differing source resolutions.
@@ -722,10 +855,11 @@ export class RoohaeEditor {
       opacity: obj.opacity ?? 1,
       fill: typeof obj.fill === 'string' ? obj.fill : undefined,
       stroke: typeof obj.stroke === 'string' ? obj.stroke : undefined,
-      strokeWidth: obj.strokeWidth,
+      strokeWidth: (obj.get('roohAssetType') === 'border' || obj.type === 'PageBorder') ? obj.get('roohBorderThickness') : obj.strokeWidth,
       strokeDashArray: obj.strokeDashArray,
       rx: (obj as { rx?: number }).rx,
-      roohAssetType: obj.get('roohAssetType'),
+      backgroundColor: obj.backgroundColor,
+      roohAssetType: obj.type === 'PageBorder' ? 'border' : obj.get('roohAssetType'),
       roohBorderPadding: obj.get('roohBorderPadding') ?? 0,
       text: text?.text,
       fontFamily: text?.fontFamily,
@@ -795,18 +929,32 @@ export class RoohaeEditor {
 
       const clean = Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined));
       
-      if (clean.roohBorderPadding !== undefined && obj.get('roohAssetType') === 'border') {
-        const padding = Number(clean.roohBorderPadding);
-        obj.set({ roohBorderPadding: padding });
-        const scaleX = (this.doc.width - padding * 2) / (obj.width || 1);
-        const scaleY = (this.doc.height - padding * 2) / (obj.height || 1);
-        obj.set({ scaleX, scaleY });
+      const isBorder = obj.get('roohAssetType') === 'border' || obj.type === 'PageBorder';
+
+      if (clean.roohBorderPadding !== undefined && isBorder) {
+        BorderLayerManager.updateBorderPadding(obj as any, Number(clean.roohBorderPadding), this.doc.width, this.doc.height);
         delete clean.roohBorderPadding; // handeled
+      }
+      
+      // Prevent strokeWidth from polluting PageBorder's native strokeWidth (which must be 0)
+      let borderStrokeWidth: number | undefined;
+      if (isBorder && clean.strokeWidth !== undefined) {
+        borderStrokeWidth = clean.strokeWidth as number;
+        delete clean.strokeWidth;
       }
       
       obj.set(clean);
       
-      if (obj.get('roohAssetType') && obj.isType('Group')) {
+      if (isBorder) {
+        const border = obj as any;
+        if (clean.stroke !== undefined) BorderLayerManager.updateBorderColor(border, clean.stroke as string);
+        if (borderStrokeWidth !== undefined) BorderLayerManager.updateBorderThickness(border, borderStrokeWidth);
+        if (clean.strokeDashArray !== undefined) {
+           const dashArr = clean.strokeDashArray as number[];
+           const style = (dashArr && dashArr.length > 0) ? (dashArr[0] !== undefined && dashArr[0] < 1 ? 'dotted' : 'dashed') : 'solid';
+           BorderLayerManager.updateBorderStyle(border, style, dashArr);
+        }
+      } else if (obj.get('roohAssetType') && obj.isType('Group')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (obj as any)._objects?.forEach((child: any) => {
           if (clean.stroke !== undefined) child.set({ stroke: clean.stroke });
@@ -855,18 +1003,35 @@ export class RoohaeEditor {
     if (this.mode === 'admin') {
       const clean = Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined));
       
-      if (clean.roohBorderPadding !== undefined && obj.get('roohAssetType') === 'border') {
-        const padding = Number(clean.roohBorderPadding);
-        obj.set({ roohBorderPadding: padding });
-        const scaleX = (this.doc.width - padding * 2) / (obj.width || 1);
-        const scaleY = (this.doc.height - padding * 2) / (obj.height || 1);
-        obj.set({ scaleX, scaleY });
+      const isBorder = obj.get('roohAssetType') === 'border' || obj.type === 'PageBorder';
+
+      if (clean.roohBorderPadding !== undefined && isBorder) {
+        BorderLayerManager.updateBorderPadding(obj as any, Number(clean.roohBorderPadding), this.doc.width, this.doc.height);
         delete clean.roohBorderPadding; // handeled
+      }
+      
+      // (isBorder variable moved up)
+      
+      // Prevent strokeWidth from polluting PageBorder's native strokeWidth (which must be 0)
+      let borderStrokeWidth: number | undefined;
+      if (isBorder && clean.strokeWidth !== undefined) {
+        borderStrokeWidth = clean.strokeWidth as number;
+        delete clean.strokeWidth;
       }
       
       obj.set(clean);
       
-      if (obj.get('roohAssetType') && obj.isType('Group')) {
+      if (isBorder) {
+        const border = obj as any;
+        if (clean.stroke !== undefined) BorderLayerManager.updateBorderColor(border, clean.stroke as string);
+        if (borderStrokeWidth !== undefined) BorderLayerManager.updateBorderThickness(border, borderStrokeWidth);
+        if (clean.strokeDashArray !== undefined) {
+           const dashArr = clean.strokeDashArray as number[];
+           const style = (dashArr && dashArr.length > 0) ? (dashArr[0] !== undefined && dashArr[0] < 1 ? 'dotted' : 'dashed') : 'solid';
+           BorderLayerManager.updateBorderStyle(border, style, dashArr);
+        }
+
+      } else if (obj.get('roohAssetType') && obj.isType('Group')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (obj as any)._objects?.forEach((child: any) => {
           if (clean.stroke !== undefined) child.set({ stroke: clean.stroke });
@@ -911,15 +1076,20 @@ export class RoohaeEditor {
   getLayers(): LayerEntry[] {
     const selectedIds = new Set(this.getSelection().ids);
     return (this.canvas.getObjects() as Rooh[])
-      .map((o) => ({
-        id: o.id ?? '',
-        name: o.name ?? 'Object',
-        type: o.type ?? 'object',
-        editable: Boolean(o.roohEditable),
-        locked: Boolean(o.locked),
-        hidden: Boolean(o.hidden),
-        selected: selectedIds.has(o.id ?? ''),
-      }))
+      .map((o, index) => {
+        if (!o.id) {
+          o.id = `obj-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 7)}`;
+        }
+        return {
+          id: o.id,
+          name: o.name ?? ((o as any).roohAssetType === 'draw' ? 'Draw Stroke' : 'Object'),
+          type: o.type ?? 'object',
+          editable: Boolean(o.roohEditable),
+          locked: Boolean(o.locked),
+          hidden: Boolean(o.hidden),
+          selected: selectedIds.has(o.id),
+        };
+      })
       .reverse();
   }
 

@@ -43,8 +43,16 @@ export interface ObjectSnapshot {
   strokeWidth?: number;
   strokeDashArray?: number[] | null;
   rx?: number;
+  backgroundColor?: string;
   roohAssetType?: string;
   roohBorderPadding?: number;
+  // tool-specific
+  roohToolType?: 'draw' | 'shape' | 'pen' | 'sticky' | 'wordart' | 'signature' | 'qrcode';
+  roohShapeType?: string;
+  roohDrawStyle?: string;
+  roohSignatureStyle?: string;
+  roohQRContent?: string;
+  roohWordArtStyle?: string;
   // text-specific
   text?: string;
   fontFamily?: string;

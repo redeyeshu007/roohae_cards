@@ -128,20 +128,23 @@ export class ObjectFactory {
     const { objects, options } = await loadSVGFromURL(url);
     const validObjects = objects.filter((o): o is FabricObject => o !== null);
     
-    // Slightly reduce border/line boldness by scaling down the stroke width
-    if (type === 'border' || type === 'line') {
-      validObjects.forEach((obj) => {
-        if (obj.strokeWidth !== undefined) {
-          obj.strokeWidth = Math.max(0.2, obj.strokeWidth * 0.25);
-        }
-      });
-    }
-    
     const svgObj = util.groupSVGElements(validObjects, options);
     
     // Scale SVG to fit canvas
     const scale = Math.min(1, maxSize / Math.max(svgObj.width ?? 1, svgObj.height ?? 1));
     svgObj.set({ scaleX: scale, scaleY: scale });
+    
+    if (type === 'border' || type === 'line') {
+      // Set strokeUniform to prevent stretching, and adjust initial strokeWidth
+      // so it looks correct at the initial scale.
+      const children = svgObj.isType('Group') ? (svgObj as any)._objects : [svgObj];
+      children?.forEach((child: any) => {
+        child.set({ strokeUniform: true });
+        if (child.strokeWidth !== undefined) {
+          child.set({ strokeWidth: Math.max(1, child.strokeWidth * scale * 0.25) });
+        }
+      });
+    }
     
     const name = type === 'border' ? 'Border' : 'Line';
     

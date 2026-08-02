@@ -7,6 +7,7 @@ import { useRoohaeEditor } from '@roohae/editor-sdk';
 import { Skeleton } from '../components/basics';
 import { EditorTopBar, type SaveStatus } from './TopBar';
 import { EditorLeftSidebar, type AssetBrowserProps, type SidebarSection } from './LeftSidebar';
+import type { DrawBrushType } from '@roohae/editor-sdk';
 import { PropertiesPanel } from './PropertiesPanel';
 import { PagesBar } from './PagesBar';
 import { ContextMenu } from './ContextMenu';
@@ -41,6 +42,9 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; isOpen: boolean }>({ x: 0, y: 0, isOpen: false });
 
+  // Draw Toolbar State
+  const [activeBrush, setActiveBrush] = useState<DrawBrushType | null>(null);
+
   const {
     canvasRef,
     editor,
@@ -71,6 +75,17 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
     props.onReady?.(editor);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, ready]);
+
+  // Sync tool manager state to UI
+  useEffect(() => {
+    if (!editor) return;
+    const updateActiveTool = () => {
+      const activeTool = editor.toolManager.getActiveToolId();
+      if (activeTool === 'draw') {
+        setActiveBrush((prev: DrawBrushType | null) => prev || 'pencil');
+      }
+    };
+  }, [editor]);
 
   // Keyboard shortcuts.
   useEffect(() => {
@@ -114,13 +129,29 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
         e.preventDefault();
         editor.lock();
       }
+
+      const handleDrawShortcut = (brush: DrawBrushType) => {
+        editor.toolManager.activate(`draw-${brush}`);
+      };
+
+      if (!mod && e.key.toLowerCase() === 'b') {
+        handleDrawShortcut('brush');
+      } else if (!mod && e.key.toLowerCase() === 'p') {
+        handleDrawShortcut('pencil');
+      } else if (!mod && e.key.toLowerCase() === 'm') {
+        handleDrawShortcut('marker');
+      } else if (!mod && e.key.toLowerCase() === 'h') {
+        handleDrawShortcut('highlighter');
+      } else if (!mod && e.key.toLowerCase() === 'e') {
+        handleDrawShortcut('eraser');
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [editor]);
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#F0EBE3]">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#F0EBE3] select-none">
       <EditorTopBar
         title={props.title}
         onTitleChange={props.onTitleChange}

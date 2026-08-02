@@ -1,3 +1,4 @@
+import { util } from 'fabric';
 import type { FabricObject } from 'fabric';
 import type { DesignObject, DesignPage } from '@roohae/shared';
 
@@ -27,6 +28,16 @@ export const CUSTOM_PROPS = [
   'accept',
   'maxSizeMB',
   'userReplaced',
+  'roohAssetType',
+  'roohBorderPadding',
+  'roohBorderThickness',
+  // Tool properties
+  'roohToolType',
+  'roohShapeType',
+  'roohDrawStyle',
+  'roohSignatureStyle',
+  'roohQRContent',
+  'roohWordArtStyle',
 ] as const;
 
 export function newObjectId(): string {
@@ -35,6 +46,19 @@ export function newObjectId(): string {
 
 /** Serialize a fabric object into a portable DesignObject. */
 export function toDesignObject(obj: FabricObject): DesignObject {
+  // Heal corrupted paths that might have been set as strings (runtime bug recovery)
+  if (obj.type === 'path' || obj.type === 'Path') {
+    const pathObj = obj as any;
+    if (typeof pathObj.path === 'string') {
+      try {
+        // Use fabric.util.parsePath to recover the array
+        pathObj.path = util.parsePath(pathObj.path) || [];
+      } catch (e) {
+        pathObj.path = [];
+      }
+    }
+  }
+
   const json = obj.toObject([...CUSTOM_PROPS]) as Record<string, unknown>;
   const design = json as unknown as DesignObject;
 
@@ -65,7 +89,13 @@ export function pageToFabricJSON(
     const { editable, ...rest } = obj;
     const runtime: Record<string, unknown> = { ...rest, roohEditable: editable };
     if (obj.assetId) {
-      const src = resolveAsset(obj.assetId);
+      const isUrl =
+        obj.assetId.startsWith('data:') ||
+        obj.assetId.startsWith('http://') ||
+        obj.assetId.startsWith('https://') ||
+        obj.assetId.startsWith('blob:') ||
+        obj.assetId.startsWith('/');
+      const src = isUrl ? obj.assetId : (resolveAsset(obj.assetId) ?? obj.assetId);
       if (src) {
         runtime.src = src;
         runtime.crossOrigin = 'anonymous';
