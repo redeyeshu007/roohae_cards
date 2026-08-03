@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { ArrowLeft, Square, PenTool, Sticker, Type, Pencil, Highlighter, Eraser, Paintbrush, Sparkles, X, ChevronDown, Upload } from 'lucide-react';
+import { ArrowLeft, Square, PenTool, Sticker, Type, Pencil, Highlighter, Eraser, Paintbrush, Sparkles, X, ChevronDown, Upload, Scissors } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { Input } from '../components/basics';
 import { Slider } from '../components/controls';

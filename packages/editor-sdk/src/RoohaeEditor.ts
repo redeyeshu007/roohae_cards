@@ -202,6 +202,136 @@ export class RoohaeEditor {
     this.addAndCenter(qr);
   }
 
+  /**
+   * Remove background from the currently selected image object.
+   * Uses a pure client-side approach: samples border pixels to determine the
+   * dominant background colour, then removes matching pixels with soft alpha
+   * matting for clean edges.
+   */
+  async removeBackgroundFromSelected(tolerance = 30): Promise<void> {
+    const active = this.canvas.getActiveObject();
+    if (!active || !(active instanceof FabricImage)) {
+      throw new Error('Please select an image layer first.');
+    }
+
+    const img = active as FabricImage & Rooh;
+    const el = img.getElement() as HTMLImageElement | HTMLCanvasElement;
+
+    // Render image to an offscreen canvas at natural resolution
+    const offscreen = document.createElement('canvas');
+    const natW = ('naturalWidth' in el ? el.naturalWidth : el.width) || img.width;
+    const natH = ('naturalHeight' in el ? el.naturalHeight : el.height) || img.height;
+    offscreen.width = natW;
+    offscreen.height = natH;
+    const ctx = offscreen.getContext('2d')!;
+    ctx.drawImage(el, 0, 0, natW, natH);
+
+    const imageData = ctx.getImageData(0, 0, natW, natH);
+    const { data } = imageData;
+    const w = natW;
+    const h = natH;
+
+    // --- Step 1: Sample border pixels to find dominant background colour ---
+    const borderPixels: Array<[number, number, number]> = [];
+    const samplePixel = (x: number, y: number) => {
+      const idx = (y * w + x) * 4;
+      if (data[idx + 3]! > 128) {
+        borderPixels.push([data[idx]!, data[idx + 1]!, data[idx + 2]!]);
+      }
+    };
+    // Top & bottom rows
+    for (let x = 0; x < w; x++) { samplePixel(x, 0); samplePixel(x, h - 1); }
+    // Left & right columns
+    for (let y = 0; y < h; y++) { samplePixel(0, y); samplePixel(w - 1, y); }
+
+    if (borderPixels.length === 0) {
+      throw new Error('Could not detect background colour.');
+    }
+
+    // Average colour of border pixels
+    let rSum = 0, gSum = 0, bSum = 0;
+    for (const [r, g, b] of borderPixels) { rSum += r; gSum += g; bSum += b; }
+    const n = borderPixels.length;
+    const bgR = Math.round(rSum / n);
+    const bgG = Math.round(gSum / n);
+    const bgB = Math.round(bSum / n);
+
+    // --- Step 2: Remove matching pixels with soft alpha ---
+    const tol = tolerance;
+    const softEdge = tol * 0.6; // transition zone for smooth edges
+
+    for (let i = 0; i < data.length; i += 4) {
+      const dr = data[i]! - bgR;
+      const dg = data[i + 1]! - bgG;
+      const db = data[i + 2]! - bgB;
+      const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+
+      if (dist < tol - softEdge) {
+        // Definitely background → fully transparent
+        data[i + 3] = 0;
+      } else if (dist < tol + softEdge) {
+        // Transition zone → partial transparency for soft edges
+        const alpha = Math.round(((dist - (tol - softEdge)) / (2 * softEdge)) * 255);
+        data[i + 3] = Math.min(data[i + 3]!, alpha);
+      }
+      // else: keep original alpha
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+
+    // --- Step 3: Replace the image source on the Fabric object ---
+    const resultDataUrl = offscreen.toDataURL('image/png');
+    const newImg = await FabricImage.fromURL(resultDataUrl, { crossOrigin: 'anonymous' });
+
+    // Preserve position, size, rotation, origin, and custom properties of the original image
+    const origProps = {
+      left: img.left,
+      top: img.top,
+      width: img.width,
+      height: img.height,
+      scaleX: img.scaleX,
+      scaleY: img.scaleY,
+      cropX: img.cropX,
+      cropY: img.cropY,
+      angle: img.angle,
+      flipX: img.flipX,
+      flipY: img.flipY,
+      originX: img.originX,
+      originY: img.originY,
+      skewX: img.skewX,
+      skewY: img.skewY,
+      opacity: img.opacity,
+    };
+
+    // Copy all custom properties defined in CUSTOM_PROPS (excluding assetId so that the data-URL is saved and resolved directly)
+    const customProps: Record<string, any> = {};
+    for (const key of ['id', 'name', 'roohEditable', 'locked', 'hidden', 'placeholderName', 'allowedAssetIds', 'allowCustomUpload', 'accept', 'maxSizeMB', 'userReplaced', 'roohAssetType']) {
+      if (key in img) {
+        customProps[key] = (img as any)[key];
+      }
+    }
+
+    newImg.set({
+      ...origProps,
+      ...customProps,
+      assetId: undefined, // Clear assetId so it references the new background-removed data URL
+      src: resultDataUrl,  // Save the background-removed base64 image data directly
+      transparentCorners: false,
+      cornerColor: '#FFFFFF',
+      cornerStrokeColor: '#94A3B8',
+      borderColor: '#8B5CF6',
+      cornerSize: 12,
+      cornerStyle: 'circle',
+      borderScaleFactor: 2.5,
+    } as any);
+
+    // Remove old, add new
+    this.canvas.remove(img);
+    this.canvas.add(newImg);
+    this.canvas.setActiveObject(newImg);
+    this.commit();
+  }
+
   private addAndCenter(obj: FabricObject): void {
     this.canvas.add(obj);
     this.canvas.centerObject(obj);
