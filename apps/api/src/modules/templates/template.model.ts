@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Mongoose schema and model definition for design templates in the Roohae marketplace/catalog.
+ *
+ * MAIN RESPONSIBILITY:
+ * Stores template canvas JSON (DesignDocument), category association, status (draft/published/archived),
+ * dimensions, thumbnail URL, referenced asset IDs, font families, tags, and usage counters.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/templates/templates.service.ts (Template CRUD and publishing)
+ * - packages/shared/src/schemas/template.schema.ts (Zod validation schemas)
+ * - apps/admin & apps/user (Template catalog, gallery, and editor)
+ */
+
 import { Schema, model, type HydratedDocument, type Model } from 'mongoose';
 import {
   MEASUREMENT_UNITS,

@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * Animated customer vector illustration component for the storytelling section.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders an animated SVG customer character with breathing motions, blinking eyes,
+ * and gesturing arms during dialogue phases.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/story/ConversationStory.tsx
+ */
+
 "use client";
 
 import { motion } from "framer-motion";

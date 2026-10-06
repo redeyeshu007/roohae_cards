@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Authenticated user homepage and template discovery gallery.
+ *
+ * MAIN RESPONSIBILITY:
+ * Fetches published template catalog and design format categories from backend APIs,
+ * supports text search and category filtering, and navigates to the template designer session.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/queries.ts (useCategories, useTemplates)
+ * - apps/user/src/app/design/[templateId]/page.tsx (navigates here to start design)
+ * - apps/api/src/modules/templates/templates.routes.ts
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -12,12 +26,18 @@ import { useAuthStore } from '@/lib/api';
 export default function DashboardPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  // FILTER STATES:
+  // Tracks active category id filter and search input query
   const [categoryId, setCategoryId] = useState<string>('');
   const [search, setSearch] = useState('');
 
+  // API QUERIES:
+  // Fetches available categories and filtered published templates
   const { data: categories } = useCategories();
   const { data: templates, isLoading } = useTemplates({ categoryId, search });
 
+  // NAVIGATION:
+  // Launches designer session for the selected template without saving upfront
   function startDesign(template: Template) {
     router.push(`/design/${template.id}`);
   }
@@ -104,9 +124,12 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: Math.min(i * 0.03, 0.3) }}
             >
-        <div className="group overflow-hidden rounded-[32px] border border-[#EADFC8] bg-[#FBF8F1] shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
-          onClick={() => startDesign(template)}
-        >
+              {/* BUTTON / CARD ACTION:
+                  Clicking opens temporary draft session for template customization */}
+              <div
+                className="group overflow-hidden rounded-[32px] border border-[#EADFC8] bg-[#FBF8F1] shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                onClick={() => startDesign(template)}
+              >
                 {/* Thumbnail */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#F5EFE4] border-b border-[#EADFC8]">
                   {template.thumbnailUrl ? (

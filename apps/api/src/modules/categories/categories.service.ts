@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Category domain service managing product card sizes, taxonomy, and relations.
+ *
+ * MAIN RESPONSIBILITY:
+ * Handles category creation with automatic slug generation, updates, deletion guards
+ * (rejects deletion if templates depend on the category), and attaches template counts via MongoDB aggregation.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/categories/categories.routes.ts (routes call service methods)
+ * - apps/api/src/modules/categories/category.model.ts (MongoDB Category model)
+ * - apps/api/src/modules/templates/template.model.ts (checks template foreign key usage)
+ */
+
 import type { CreateCategoryInput, UpdateCategoryInput } from '@roohae/shared';
 import { ApiError } from '../../lib/errors';
 import { slugify, uniqueSlug } from '../../lib/slug';
@@ -7,6 +21,7 @@ import { TemplateModel } from '../templates/template.model';
 import { activityService } from '../activity/activity.service';
 
 export class CategoriesService {
+
   async create(adminId: string, input: CreateCategoryInput) {
     const slug = slugify(input.name);
     const exists = await CategoryModel.findOne({ slug }).exec();

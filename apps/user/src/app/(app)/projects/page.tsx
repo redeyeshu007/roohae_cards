@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * User saved projects management gallery ("My Designs").
+ *
+ * MAIN RESPONSIBILITY:
+ * Lists the authenticated user's saved project designs, supports text search filtering,
+ * provides one-click navigation back into the editor (/editor/[projectId]), and allows deletion.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/queries.ts (useProjects, useDeleteProject)
+ * - apps/user/src/app/editor/[projectId]/page.tsx
+ * - apps/api/src/modules/projects/projects.routes.ts
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -15,6 +29,8 @@ import { useDeleteProject, useProjects } from '@/lib/queries';
 
 export default function ProjectsPage() {
   const [search, setSearch] = useState('');
+  // API QUERIES & MUTATIONS:
+  // Fetches user's saved projects and handles project deletion
   const { data: projects, isLoading } = useProjects(search);
   const deleteMutation = useDeleteProject();
 
@@ -58,6 +74,8 @@ export default function ProjectsPage() {
           <p className="mt-1 text-[14px] text-[#6B6B6B]">
             Browse templates on the home page and customize one to get started.
           </p>
+          {/* BUTTON:
+              Navigate to template gallery */}
           <button
             onClick={() => (window.location.href = '/dashboard')}
             className="mt-6 rounded-full bg-[#1F1F1F] px-6 py-2.5 text-[14px] font-medium text-white transition-all hover:bg-[#3A3A3A]"
@@ -110,6 +128,8 @@ export default function ProjectsPage() {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
+                    {/* BUTTON:
+                        Project actions dropdown menu */}
                     <Button
                       variant="ghost"
                       size="icon-sm"
@@ -119,11 +139,15 @@ export default function ProjectsPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44">
+                    {/* BUTTON:
+                        Open project in editor */}
                     <DropdownMenuItem
                       onSelect={() => (window.location.href = `/editor/${project.id}`)}
                     >
                       Open
                     </DropdownMenuItem>
+                    {/* BUTTON:
+                        Delete project -> DELETE /api/v1/projects/:id */}
                     <DropdownMenuItem
                       destructive
                       onSelect={() => deleteMutation.mutate(project.id)}

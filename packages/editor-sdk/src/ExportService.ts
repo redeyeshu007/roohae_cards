@@ -1,15 +1,29 @@
+/**
+ * FILE PURPOSE:
+ * Roohae Export Service & Offscreen Print-Ready Rendering Engine.
+ *
+ * MAIN RESPONSIBILITY:
+ * Offscreen rendering engine for production design exports.
+ * Renders design documents at native resolution on an offscreen StaticCanvas,
+ * resolving original high-resolution assets, applying background filters,
+ * and generating print-ready deliverables:
+ * 1. PNG: Lossless full-resolution raster export.
+ * 2. JPG: High-quality compressed export.
+ * 3. PDF: Multi-page print-ready vector/raster PDF generated via pdf-lib at 300 DPI physical points ((width / 300) * 72).
+ * 4. Preview: High-crispness data URL for in-browser flip inspection modal.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/app/editor/[templateId]/page.tsx (Download button in TopBar, Preview modal)
+ * - apps/user/src/components/ProjectEditor.tsx (Print/Download button in TopBar)
+ * - packages/ui/src/editor/TopBar.tsx (Export actions trigger ExportService)
+ */
+
 import { StaticCanvas, FabricImage, filters } from 'fabric';
 import { PDFDocument } from 'pdf-lib';
 import type { DesignDocument, DesignPage } from '@roohae/shared';
 import { pageToFabricJSON } from './serialization';
 import type { ExportOptions } from './types';
 
-/**
- * Renders design documents at their FULL native resolution on an offscreen
- * canvas — independent of the on-screen zoom — always using original assets.
- * Quality is never reduced: PNG is lossless, JPG at max quality, PDF embeds
- * the losslessly-rendered PNG pages.
- */
 /** Downloads and previews auto-upscale small designs to at least this width. */
 const AUTO_MIN_WIDTH = 1200;
 const MAX_AUTO_SCALE = 6;
@@ -106,12 +120,17 @@ export class ExportService {
     }
   }
 
+  // EXPORT PIPELINE:
+  // Main export method handling single/multi-page image downloads or compiled 300 DPI multi-page PDF generation.
+  // Triggered by: TopBar Export dropdown selection (PNG, JPG, PDF).
   async export(doc: DesignDocument, options: ExportOptions): Promise<void> {
     const scale = options.scale ?? ExportService.autoScaleFor(doc);
     const pageIndexes = options.pages ?? doc.pages.map((_, i) => i);
     const name = options.fileName ?? 'design';
 
     if (options.format === 'pdf') {
+      // PDF EXPORT:
+      // Constructs a vector PDF document using pdf-lib with physical page sizing calculated at 300 DPI.
       const pdf = await PDFDocument.create();
       for (const index of pageIndexes) {
         const page = doc.pages[index];
@@ -131,6 +150,8 @@ export class ExportService {
       return;
     }
 
+    // IMAGE EXPORT (PNG / JPG):
+    // Renders each requested design page to high-res data URL and triggers browser file download.
     const format = options.format === 'jpg' ? 'jpeg' : 'png';
     for (const index of pageIndexes) {
       const page = doc.pages[index];
@@ -146,6 +167,9 @@ export class ExportService {
    * rendered ABOVE native size so the preview stays crisp — text and shapes
    * are vectors, and images re-render from their originals.
    */
+  // PREVIEW RENDERER:
+  // Generates crisp raster preview data URL for flip inspection modal.
+  // Called by: TopBar onPreview button.
   async preview(doc: DesignDocument, pageIndex: number, maxWidth = 1200): Promise<string> {
     const page = doc.pages[pageIndex];
     if (!page) throw new Error(`Page ${pageIndex} does not exist`);
@@ -154,6 +178,8 @@ export class ExportService {
   }
 }
 
+// BROWSER DOWNLOAD: DATA URL
+// Creates a temporary anchor tag to prompt client file download.
 function downloadDataUrl(dataUrl: string, fileName: string): void {
   const link = document.createElement('a');
   link.href = dataUrl;
@@ -161,6 +187,8 @@ function downloadDataUrl(dataUrl: string, fileName: string): void {
   link.click();
 }
 
+// BROWSER DOWNLOAD: BLOB
+// Creates an object URL for PDF binary blobs and triggers client save dialog.
 function downloadBlob(blob: Blob, fileName: string): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');

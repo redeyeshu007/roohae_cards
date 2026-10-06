@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Saved user project design canvas editing page.
+ *
+ * MAIN RESPONSIBILITY:
+ * Dynamically loads the Fabric.js ProjectEditor client bundle, mounts the user's
+ * saved design by projectId, and engages the autosave engine.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/ProjectEditor.tsx (ProjectEditor)
+ * - packages/ui/src/editor/EditorSkeleton.tsx
+ */
+
 'use client';
 
 import { use } from 'react';

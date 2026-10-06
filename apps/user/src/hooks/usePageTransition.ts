@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Custom React hook for triggering animated shader page navigation.
+ *
+ * MAIN RESPONSIBILITY:
+ * Exposes a navigate(href) helper that initiates the Three.js cover animation sequence
+ * before completing client-side Next.js route transitions.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/store/transitionStore.ts
+ * - apps/user/src/components/common/PageTransitionCanvas.tsx
+ */
+
 "use client";
 
 import { useCallback } from "react";

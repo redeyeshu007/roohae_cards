@@ -1,5 +1,18 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Placeholder loading skeleton for the full-screen editor layout.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders pulse skeletons for the top bar, left sidebar rail, center canvas stage, and bottom pages bar
+ * while document data, assets, and Google/custom fonts are being asynchronously fetched and mounted.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/app/editor/[templateId]/page.tsx (rendered during initial template loading)
+ * - apps/user/src/components/ProjectEditor.tsx (rendered during project hydration)
+ */
+
 import { Loader2 } from 'lucide-react';
 import { Skeleton } from '../components/basics';
 
@@ -8,6 +21,8 @@ import { Skeleton } from '../components/basics';
  * are being prepared. The Fabric canvas is never mounted before everything
  * is ready — users never see a blank white canvas.
  */
+// EDITOR SKELETON:
+// Renders animated loading skeleton to prevent layout flash during font and asset hydration.
 export function EditorSkeleton({ label = 'Preparing your design…' }: { label?: string }) {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-slate-100 dark:bg-slate-950">

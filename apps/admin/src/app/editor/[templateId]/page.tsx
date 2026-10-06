@@ -1,3 +1,19 @@
+/**
+ * FILE PURPOSE:
+ * Full-screen template authoring studio for administrators.
+ *
+ * MAIN RESPONSIBILITY:
+ * Loads the master template document JSON, resolves referenced assets,
+ * pre-loads fonts, provides real-time 4-second debounced autosave,
+ * supports high-resolution exports (PNG, JPG, PDF), and handles publishing status.
+ *
+ * CONNECTED SYSTEMS:
+ * - Admin Console route: /editor/[templateId]
+ * - packages/ui (EditorWorkspace)
+ * - packages/editor-sdk (RoohaeEditor, ExportService, loadFonts)
+ * - packages/shared (schemas, constants)
+ */
+
 'use client';
 
 import { use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -260,6 +276,30 @@ export default function TemplateEditorPage({
           <Badge variant={template.status === 'published' ? 'success' : 'warning'} className="capitalize">
             {template.status}
           </Badge>
+          {/**
+           * BUTTON: Download (Dropdown)
+           *
+           * LOCATION:
+           * Admin Editor TopBar Actions
+           *
+           * COMPONENT:
+           * TemplateEditorPage (DropdownMenuTrigger + DropdownMenuItems)
+           *
+           * CLICK HANDLER:
+           * download(format, scale)
+           *
+           * FLOW:
+           * Button
+           * → download(format)
+           * → persist(true) [Saves document + thumbnail to API]
+           * → new ExportService(resolveAsset)
+           * → exporter.export(doc, { format, scale })
+           * → StaticCanvas renders offscreen (or pdf-lib creates 300 DPI PDF)
+           * → downloadDataUrl() / downloadBlob() triggers browser download
+           *
+           * PURPOSE:
+           * Exports current template design to PNG, JPG, or 300 DPI print-ready PDF.
+           */ }
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" variant="outline" loading={exporting}>
@@ -288,6 +328,32 @@ export default function TemplateEditorPage({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/**
+           * BUTTON: Publish / Unpublish
+           *
+           * LOCATION:
+           * Admin Editor TopBar Actions
+           *
+           * COMPONENT:
+           * TemplateEditorPage (Button)
+           *
+           * CLICK HANDLER:
+           * publish()
+           *
+           * FLOW:
+           * Button
+           * → publish()
+           * → persist(true) [Saves document + thumbnail]
+           * → statusMutation.mutate({ id, status: 'published' | 'draft' })
+           * → PATCH /templates/:id/status
+           * → templatesService.setStatus()
+           * → MongoDB TemplateModel.updateOne()
+           * → Query invalidation updates UI status badge
+           *
+           * PURPOSE:
+           * Toggles template between draft (admin only) and published (discoverable by users).
+           */ }
           <Button size="sm" loading={statusMutation.isPending} onClick={() => void publish()}>
             <Globe2 className="h-4 w-4" />
             {template.status === 'published' ? 'Unpublish' : 'Publish'}

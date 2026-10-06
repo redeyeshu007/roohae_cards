@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Global error interception and 404 Not Found fallback middleware.
+ *
+ * MAIN RESPONSIBILITY:
+ * Catches operational ApiErrors, Zod validation errors, and Multer file upload errors,
+ * serializing them into standard ApiFailure { success: false, error } envelopes while shielding internal server traces in production.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/app.ts (registered as terminal Express middlewares)
+ * - packages/shared/src/types/api.ts (implements ApiFailure interface)
+ */
+
 import type { NextFunction, Request, Response } from 'express';
 import { MulterError } from 'multer';
 import { ZodError } from 'zod';
@@ -5,6 +18,8 @@ import { ApiError } from '../lib/errors';
 import { logger } from '../lib/logger';
 import { isProd } from '../config/env';
 
+// 404 NOT FOUND HANDLER:
+// Intercepts unmatched requests and returns standard 404 response.
 export function notFoundHandler(req: Request, res: Response): void {
   res.status(404).json({
     success: false,

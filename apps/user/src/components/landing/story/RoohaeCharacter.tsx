@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * Animated brand persona illustration component ("Roohae") for the storytelling section.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders the designer vector persona with brand badge, gestural arm motion, smiling lip sync,
+ * and design tablet notepad accessories during interactive story stages.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/story/ConversationStory.tsx
+ */
+
 "use client";
 
 import { motion } from "framer-motion";

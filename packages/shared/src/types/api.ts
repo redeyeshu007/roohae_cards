@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Type definitions for API request and response envelopes across Roohae.
+ *
+ * MAIN RESPONSIBILITY:
+ * Defines standard envelope contracts: ApiSuccess, ApiFailure, ApiResponse,
+ * pagination parameters, JWT token payloads, and admin dashboard statistics.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api (serializes JSON responses matching ApiSuccess / ApiFailure)
+ * - packages/ui & apps (deserializes typed Axios/fetch API responses)
+ */
+
 /** Standard API envelope returned by every endpoint. */
 export interface ApiSuccess<T> {
   success: true;

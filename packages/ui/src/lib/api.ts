@@ -1,3 +1,18 @@
+/**
+ * FILE PURPOSE:
+ * Central Axios API HTTP client factory and response interceptor pipeline.
+ *
+ * MAIN RESPONSIBILITY:
+ * Automatically injects Bearer JWT access tokens on outgoing requests,
+ * intercepts 401 Unauthorized responses to perform single-flight token rotation via POST /api/v1/auth/refresh,
+ * and retries failed requests with new access tokens.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/api.ts (instantiates api client for admin console)
+ * - apps/user/src/lib/api.ts (instantiates api client for user app)
+ * - apps/api (target REST API server on /api/v1/*)
+ */
+
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 import type { ApiFailure, AuthTokens } from '@roohae/shared';
 
@@ -11,6 +26,8 @@ export interface TokenStore {
  * Axios client with automatic access-token injection and single-flight
  * refresh-token rotation on 401.
  */
+// API CLIENT FACTORY:
+// Constructs configured Axios instance with base URL set to /api/v1 and interceptors.
 export function createApiClient(baseURL: string, store: TokenStore): AxiosInstance {
   const client = axios.create({ baseURL: `${baseURL.replace(/\/$/, '')}/api/v1` });
 
@@ -28,6 +45,8 @@ export function createApiClient(baseURL: string, store: TokenStore): AxiosInstan
     const tokens = store.getTokens();
     if (!tokens?.refreshToken) return null;
     try {
+      // FRONTEND → API CONNECTIVITY:
+      // Sends refresh token to POST /api/v1/auth/refresh to exchange for new access and refresh tokens.
       const { data } = await axios.post<{ success: true; data: { tokens: AuthTokens } }>(
         `${baseURL.replace(/\/$/, '')}/api/v1/auth/refresh`,
         { refreshToken: tokens.refreshToken },

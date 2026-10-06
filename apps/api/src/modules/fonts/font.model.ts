@@ -1,4 +1,18 @@
+/**
+ * FILE PURPOSE:
+ * Font family Mongoose model and MongoDB schema definition.
+ *
+ * MAIN RESPONSIBILITY:
+ * Defines schema for uploaded custom web fonts, storing family identifiers,
+ * category groupings, and individual weight/style FontFace subdocuments with binary storage keys.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/fonts/fonts.service.ts (queries and writes FontModel)
+ * - packages/editor-sdk/src/fonts.ts (registers these faces in the browser)
+ */
+
 import { Schema, model, type HydratedDocument, type Model } from 'mongoose';
+
 
 export interface FontFaceDoc {
   weight: number;

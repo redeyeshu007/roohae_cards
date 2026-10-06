@@ -1,3 +1,19 @@
+/**
+ * FILE PURPOSE:
+ * User and Administrator authentication login page.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides user login credentials form, calls POST /api/v1/auth/login,
+ * persists user profile and JWT tokens to useAuthStore, and routes to either
+ * /admin/dashboard (for admin role) or /dashboard (for standard user role).
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/api.ts (api client and useAuthStore)
+ * - apps/api/src/modules/auth/auth.routes.ts (POST /api/v1/auth/login)
+ * - apps/user/src/app/(app)/dashboard/page.tsx
+ * - apps/user/src/app/register/page.tsx
+ */
+
 "use client";
 
 import { useState } from "react";
@@ -23,6 +39,8 @@ const jakarta = Plus_Jakarta_Sans({
 
 export default function LoginPage() {
   const router = useRouter();
+  // AUTH STORE:
+  // Injects user profile and access/refresh tokens upon authentication
   const setSession = useAuthStore((s) => s.setSession);
   
   const [loginEmail, setLoginEmail] = useState("");
@@ -30,16 +48,25 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // AUTH SUBMISSION:
+  // FLOW:
+  // Form submission -> submit() -> POST /api/v1/auth/login -> setSession() -> routes to dashboard
   async function submit() {
     setLoading(true);
     try {
+      // API CONNECTION:
+      // Sends email and password credentials to backend authentication endpoint
       const res = await api.post<{ success: true; data: LocalAuthPayload }>('/auth/login', {
         email: loginEmail,
         password: loginPassword,
       });
       const { user, accessToken, refreshToken } = res.data.data;
+      // STATE UPDATE:
+      // Sets session credentials in persisted Zustand store
       setSession(user as any, { accessToken, refreshToken });
       
+      // NAVIGATION:
+      // Routes admin users to /admin/dashboard and regular users to /dashboard
       if (user.role === 'admin') {
         router.replace('/admin/dashboard');
       } else {
@@ -142,6 +169,8 @@ export default function LoginPage() {
             >
               Password
             </label>
+            {/* BUTTON:
+                Show/Hide Password toggle */}
             <button
               suppressHydrationWarning
               type="button"
@@ -163,6 +192,8 @@ export default function LoginPage() {
           </div>
 
           <div className="pt-2">
+            {/* BUTTON:
+                Sign In submit button */}
             <button
               suppressHydrationWarning
               type="submit"
@@ -186,6 +217,8 @@ export default function LoginPage() {
           <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-[#E7DDD6]"></div>
         </div>
 
+        {/* BUTTON:
+            Google SSO placeholder button */}
         <button suppressHydrationWarning className="w-full flex items-center justify-center gap-3 bg-transparent border border-[#E7DDD6] text-[#1F1F1F] py-3 px-6 rounded-2xl font-medium text-[14px] transition-all duration-300 hover:bg-white hover:border-transparent hover:-translate-y-1 hover:shadow-[0_8px_20px_rgb(0,0,0,0.06)] focus:outline-none">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

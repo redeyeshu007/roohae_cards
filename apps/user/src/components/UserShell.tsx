@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Navigation chrome and persistent header for the user application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders the top brand header, navigation links (Home, My Designs), user profile dropdown,
+ * and handles user logout by clearing the Zustand auth store and routing to '/'.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/api.ts (useAuthStore)
+ * - apps/user/src/app/(app)/dashboard/page.tsx (/dashboard)
+ * - apps/user/src/app/(app)/projects/page.tsx (/projects)
+ */
+
 'use client';
 
 import Link from 'next/link';
@@ -23,8 +37,12 @@ const NAV = [
 export function UserShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  // AUTH STATE:
+  // Reads current user profile, hydration status, and session clearing function
   const { user, hydrated, clear } = useAuthStore();
 
+  // AUTH PROTECTION:
+  // Redirects unauthenticated users to /login once store has hydrated
   useEffect(() => {
     if (hydrated && !user) router.replace('/login');
   }, [hydrated, user, router]);
@@ -109,10 +127,14 @@ export function UserShell({ children }: { children: ReactNode }) {
                   <p className="truncate text-[12px] text-[#6B6B6B]">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
+                {/* BUTTON:
+                    Navigate to My Designs */}
                 <DropdownMenuItem onSelect={() => router.push('/projects')}>
                   <UserRound className="h-4 w-4" /> My Designs
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                {/* BUTTON:
+                    Sign out user action -> clears auth store -> routes to / */}
                 <DropdownMenuItem
                   destructive
                   onSelect={() => {

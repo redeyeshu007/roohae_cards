@@ -1,3 +1,14 @@
+/**
+ * FILE PURPOSE:
+ * Suspense loading fallback for admin routes in user application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders a centered spinner during async data fetches and page transitions.
+ *
+ * CONNECTED SYSTEMS:
+ * - Next.js App Router streaming boundary
+ */
+
 import { Loader2 } from 'lucide-react';
 
 export default function Loading() {

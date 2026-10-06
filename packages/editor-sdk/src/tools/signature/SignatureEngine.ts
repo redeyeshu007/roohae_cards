@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Digital signature authoring engine for card personalization.
+ *
+ * MAIN RESPONSIBILITY:
+ * Configures decimated smooth PencilBrush rendering with realistic fountain ink coloration,
+ * capturing freehand signer signatures and tagging created paths as roohAssetType: 'signature'.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/tools/common/ToolManager.ts (manages signature tool)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Tools > Signature tool)
+ */
+
 import { PencilBrush, Shadow } from 'fabric';
 import { BaseTool, ToolContext } from '../common/BaseTool';
 
@@ -7,7 +20,10 @@ export interface SignatureConfig {
   opacity: number;
 }
 
+// TOOL: SIGNATURE ENGINE
+// Captures smooth calligraphic signatures using decimated path strokes.
 export class SignatureEngine extends BaseTool {
+
   private config: SignatureConfig = {
     color: '#000088', // typical ink color
     thickness: 3,

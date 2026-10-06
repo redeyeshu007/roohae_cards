@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * Dynamic client-only loader for the WebGL page transition canvas.
+ *
+ * MAIN RESPONSIBILITY:
+ * Dynamically imports PageTransitionCanvas with ssr: false and excludes it on /login and /register routes.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/common/PageTransitionCanvas.tsx
+ * - apps/user/src/app/layout.tsx
+ */
+
 "use client";
 
 import dynamic from "next/dynamic";

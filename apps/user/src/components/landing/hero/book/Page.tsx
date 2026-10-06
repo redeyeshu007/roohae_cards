@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * Individual paper sheet base styling component for the 3D book.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders physical paper background color, tactile paper grain texture overlay,
+ * gutter shadow curvature near the spine, and edge highlights.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/book/OpenBook.tsx
+ */
+
 import React from "react";
 
 export function Page({ color, spine }: { color: string; spine: "left" | "right" }) {

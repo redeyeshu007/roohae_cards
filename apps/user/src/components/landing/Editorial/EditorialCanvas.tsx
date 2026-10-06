@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * Interactive WebGL background canvas for the editorial landing section.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders procedural noise, fluid silk physics, and cursor-reactive iridescent lighting
+ * using Three.js and custom GLSL fragment shaders.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/Editorial/EditorialSection.tsx
+ */
+
 "use client";
 
 import { useEffect, useRef } from "react";

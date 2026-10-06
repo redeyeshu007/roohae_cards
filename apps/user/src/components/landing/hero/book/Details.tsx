@@ -1,3 +1,14 @@
+/**
+ * FILE PURPOSE:
+ * Decorative embellishments and craftsmanship details for book pages.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders foil underlines, wax seals, botanical ornaments, and debossed border details.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/book/Page.tsx
+ */
+
 import React from "react";
 import { type DetailType } from "./pages";
 

@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Design format categories management interface for admin inside user app.
+ *
+ * MAIN RESPONSIBILITY:
+ * Displays all card categories with dimension preview and template counters,
+ * enables creating, editing, and deleting categories with default canvas units.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/admin-queries.ts (useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory)
+ * - apps/api/src/modules/categories/categories.routes.ts
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -49,6 +62,8 @@ export default function CategoriesPage() {
   const [editing, setEditing] = useState<Category | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
+  // API QUERIES & MUTATIONS:
+  // Fetches categories and provides mutation handlers
   const { data: categories, isLoading } = useCategories(search);
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
@@ -72,6 +87,8 @@ export default function CategoriesPage() {
     setOpen(true);
   }
 
+  // SUBMIT FLOW:
+  // Form submission -> createMutation or updateMutation -> POST or PATCH /api/v1/categories
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const payload = {
@@ -96,6 +113,8 @@ export default function CategoriesPage() {
         description="Design formats users can browse — each defines a default canvas size."
         breadcrumb="Admin / Categories"
         actions={
+          // BUTTON:
+          // Open create category dialog
           <Button onClick={openCreate}>
             <Plus className="h-4 w-4" /> New category
           </Button>
@@ -147,13 +166,19 @@ export default function CategoriesPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
+                    {/* BUTTON:
+                        Category options menu */}
                     <Button variant="ghost" size="icon-sm">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    {/* BUTTON:
+                        Edit category */}
                     <DropdownMenuItem onSelect={() => openEdit(category)}>Edit</DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    {/* BUTTON:
+                        Delete category */}
                     <DropdownMenuItem
                       destructive
                       onSelect={() => deleteMutation.mutate(category.id)}
@@ -175,6 +200,7 @@ export default function CategoriesPage() {
         </div>
       )}
 
+      {/* CREATE / EDIT CATEGORY DIALOG */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           title={editing ? 'Edit category' : 'New category'}

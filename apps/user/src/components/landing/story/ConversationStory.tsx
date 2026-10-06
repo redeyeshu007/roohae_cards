@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Interactive narrative storytelling section linking conversation to physical print card design.
+ *
+ * MAIN RESPONSIBILITY:
+ * Orchestrates a state machine alternating between Customer character inquiry, Roohae designer response,
+ * and 3D card product reveal (wedding invitations, visiting cards, birthday invites, certificates).
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/story/CustomerCharacter.tsx
+ * - apps/user/src/components/landing/story/RoohaeCharacter.tsx
+ * - apps/user/src/components/landing/story/ProductReveal.tsx
+ */
+
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -381,6 +395,8 @@ export function ConversationStory() {
 
       {/* ── CTA ─────────────────────────────────────────────────────── */}
       <div className="relative z-10 flex justify-center pb-20 pt-1">
+        {/* BUTTON / CTA LINK:
+            Navigates to template editor */}
         <motion.a
           href="/editor"
           className="group relative inline-flex items-center gap-3 font-sans font-semibold"

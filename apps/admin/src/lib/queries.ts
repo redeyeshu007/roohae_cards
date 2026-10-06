@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * TanStack React Query hooks and mutations for the Roohae admin panel.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides strongly-typed data fetching, caching, and mutation hooks for dashboard stats,
+ * categories, templates, fonts, assets, users, and admin profile management.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/api.ts (api client making HTTP calls to /api/v1/* endpoints)
+ * - apps/admin/src/app/(panel)/* (Admin UI pages consuming these hooks)
+ * - packages/shared (data types and inputs)
+ */
+
 'use client';
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

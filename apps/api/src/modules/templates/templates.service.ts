@@ -1,3 +1,20 @@
+/**
+ * FILE PURPOSE:
+ * Manages administrative master templates, dimension calculation, category binding,
+ * asset and font dependency tracking, publishing lifecycle status state machine,
+ * and template duplication.
+ *
+ * MAIN RESPONSIBILITY:
+ * Enforces publishing state machine transitions (draft ↔ published → archived),
+ * calculates canvas dimensions at 300 DPI, updates template document JSON, and indexes asset references.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/templates/templates.routes.ts (receives HTTP requests)
+ * - apps/api/src/modules/templates/template.model.ts (MongoDB operations via Mongoose)
+ * - apps/admin & apps/user (API consumers)
+ */
+
+
 import {
   collectAssetIds,
   collectFontFamilies,

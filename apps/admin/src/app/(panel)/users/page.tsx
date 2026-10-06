@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Registered user accounts management page for Roohae Admin.
+ *
+ * MAIN RESPONSIBILITY:
+ * Lists all platform users with roles, joined timestamps, last sign-in dates, and active status switches;
+ * provides instant toggle mutation for activating/deactivating accounts.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/queries.ts (useUsers, useSetUserActive)
+ * - apps/api/src/modules/users/users.routes.ts
+ * - apps/admin/src/components/AdminShell.tsx (PageHeader)
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -8,6 +22,8 @@ import { useSetUserActive, useUsers } from '@/lib/queries';
 
 export default function UsersPage() {
   const [search, setSearch] = useState('');
+  // API QUERIES & MUTATIONS:
+  // Fetches user records and handles active status toggle
   const { data, isLoading } = useUsers(search);
   const setActiveMutation = useSetUserActive();
 
@@ -78,6 +94,8 @@ export default function UsersPage() {
                       {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : '—'}
                     </td>
                     <td className="px-6 py-3.5 text-right">
+                      {/* SWITCH / TOGGLE:
+                          Toggles user active state (PATCH /api/v1/users/:id/active) */}
                       <Switch
                         checked={user.isActive}
                         disabled={user.role === 'admin'}

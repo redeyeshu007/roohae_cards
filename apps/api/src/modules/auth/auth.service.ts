@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Authentication business logic, credential hashing, and JWT token lifecycle service.
+ *
+ * MAIN RESPONSIBILITY:
+ * Handles bcrypt password hashing/verification, user registration, login credential checks,
+ * JWT access/refresh token signing, token revocation via tokenVersion bumps, and profile updates.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/auth/auth.controller.ts (calls AuthService methods)
+ * - apps/api/src/modules/users/user.repository.ts (reads and writes User documents in MongoDB)
+ * - apps/api/src/lib/tokens.ts (signs and verifies JWT tokens)
+ */
+
 import bcrypt from 'bcryptjs';
 import type {
   ChangePasswordInput,
@@ -15,6 +29,7 @@ import {
 import { userRepository } from '../users/user.repository';
 import type { UserDocument } from '../users/user.model';
 import { activityService } from '../activity/activity.service';
+
 
 const BCRYPT_ROUNDS = 12;
 

@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Design template catalog management page for admin inside user app.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides template listing with status tab filter and search, card grid with action menus
+ * (publish/unpublish, duplicate, archive, delete), and creation dialog.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/admin-queries.ts (useTemplates, useCategories, useCreateTemplate, useSetTemplateStatus, useDuplicateTemplate, useDeleteTemplate)
+ * - apps/user/src/app/admin/editor/[templateId]/page.tsx
+ * - apps/api/src/modules/templates/templates.routes.ts
+ */
+
 'use client';
 
 import { memo, useMemo, useState } from 'react';
@@ -50,6 +64,8 @@ export default function TemplatesPage() {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
 
+  // API QUERIES & MUTATIONS:
+  // Fetches templates and handles status change, duplication, deletion
   const { data, isLoading } = useTemplates({
     status: status === 'all' ? undefined : status,
     search,
@@ -65,6 +81,8 @@ export default function TemplatesPage() {
         description="Design templates users can customize. Only published templates are visible to users."
         breadcrumb="Admin / Templates"
         actions={
+          // BUTTON:
+          // Open create template dialog
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" /> Create template
           </Button>
@@ -72,6 +90,8 @@ export default function TemplatesPage() {
       />
 
       <div className="mb-6 flex flex-wrap items-center gap-4">
+        {/* TABS:
+            Filter templates by published, draft, or archived status */}
         <Tabs value={status} onValueChange={setStatus}>
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
@@ -129,6 +149,7 @@ export default function TemplatesPage() {
         </div>
       )}
 
+      {/* CREATE TEMPLATE DIALOG */}
       <CreateTemplateDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
   );
@@ -151,6 +172,8 @@ const TemplateCard = memo(function TemplateCard({
 }) {
   return (
     <Card className="group overflow-hidden rounded-[32px] border-[#EADFC8] bg-[#FBF8F1] shadow-sm transition-all hover:shadow-md">
+      {/* BUTTON / LINK:
+          Open template in admin canvas editor */}
       <button onClick={onOpen} className="block w-full">
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#F5EFE4] border-b border-[#EADFC8]">
           {template.thumbnailUrl ? (
@@ -192,6 +215,8 @@ const TemplateCard = memo(function TemplateCard({
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
+            {/* BUTTON:
+                Template card options menu */}
             <Button variant="ghost" size="icon-sm" className="-mr-2 -mt-1 text-[#8C7A5E] hover:text-[#1F1F1F] hover:bg-[#1F1F1F]/5">
               <MoreHorizontal className="h-5 w-5" />
             </Button>
@@ -219,15 +244,23 @@ const TemplateCard = memo(function TemplateCard({
                 </div>
               </div>
             </div>
+            {/* BUTTON:
+                Open in editor */}
             <DropdownMenuItem onSelect={onOpen}>Open in editor</DropdownMenuItem>
+            {/* BUTTON:
+                Publish / Unpublish toggle */}
             <DropdownMenuItem onSelect={onPublish}>
               {template.status === 'published' ? 'Unpublish' : 'Publish'}
             </DropdownMenuItem>
+            {/* BUTTON:
+                Duplicate template */}
             <DropdownMenuItem onSelect={onDuplicate}>Duplicate</DropdownMenuItem>
             {template.status !== 'archived' && (
               <DropdownMenuItem onSelect={onArchive}>Archive</DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
+            {/* BUTTON:
+                Delete template */}
             <DropdownMenuItem destructive onSelect={onDelete}>
               Delete
             </DropdownMenuItem>
@@ -238,10 +271,6 @@ const TemplateCard = memo(function TemplateCard({
   );
 });
 
-/**
- * Canva-style "create design" flow: pick a category → dimensions auto-fill →
- * admin may still adjust before the editor opens.
- */
 function CreateTemplateDialog({
   open,
   onOpenChange,
@@ -267,12 +296,13 @@ function CreateTemplateDialog({
     setCategoryId(id);
     const category = categories?.find((c) => c.id === id);
     if (category) {
-      // Auto-fill from the category — still editable before creation.
       setWidth(String(category.width));
       setHeight(String(category.height));
     }
   }
 
+  // SUBMIT FLOW:
+  // Form submission -> createMutation -> POST /api/v1/templates -> routes to /admin/editor/[id]
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selected) return;

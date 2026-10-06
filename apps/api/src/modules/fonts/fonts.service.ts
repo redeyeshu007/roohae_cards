@@ -1,3 +1,18 @@
+/**
+ * FILE PURPOSE:
+ * Font domain service managing typography file storage, font face parsing, and metadata.
+ *
+ * MAIN RESPONSIBILITY:
+ * Handles font uploads, weight/style heuristics from filenames, SHA-256 deduplicated S3/local file storage,
+ * font face merging, public URL generation, and admin activation controls.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/fonts/font.model.ts (FontModel MongoDB documents)
+ * - apps/api/src/storage (Local and Cloudflare R2 storage providers)
+ * - packages/editor-sdk/src/fonts.ts (Editor font face loading)
+ * - apps/api/src/modules/activity/activity.service.ts (Admin audit logs)
+ */
+
 import crypto from 'node:crypto';
 import path from 'node:path';
 import type { Font } from '@roohae/shared';
@@ -5,6 +20,7 @@ import { getStorage } from '../../storage';
 import { ApiError } from '../../lib/errors';
 import { FontModel, type FontDocument, type FontFaceDoc } from './font.model';
 import { activityService } from '../activity/activity.service';
+
 
 const FORMAT_BY_EXT: Record<string, FontFaceDoc['format']> = {
   '.otf': 'opentype',

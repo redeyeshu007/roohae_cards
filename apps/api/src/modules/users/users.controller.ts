@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Express controller handlers for administrative user management operations.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides handlers for listing users with pagination and role filtering, and toggling
+ * account active/inactive status with self-deactivation protection and activity logging.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/users/users.routes.ts (Route layer caller)
+ * - apps/api/src/modules/users/user.repository.ts (User data access)
+ * - apps/api/src/modules/activity/activity.service.ts (Audit trail logging)
+ */
+
 import type { Request, Response } from 'express';
 import { asyncHandler, buildMeta, ok, parsePagination } from '../../lib/http';
 import { ApiError } from '../../lib/errors';

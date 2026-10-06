@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Express route declarations for administrator dashboard metrics and activity feed.
+ *
+ * MAIN RESPONSIBILITY:
+ * Computes high-level platform statistics (user count, total/published templates, categories, assets, fonts, projects)
+ * in parallel and serves the live administrative activity stream.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/routes.ts (mounts dashboardRoutes at /api/v1/dashboard)
+ * - apps/admin/src/app/(panel)/dashboard/page.tsx (Admin dashboard view)
+ * - apps/api/src/modules/* (reads counts from models)
+ */
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { requireAdmin } from '../../middlewares/auth.middleware';
@@ -11,6 +24,7 @@ import { ProjectModel } from '../projects/project.model';
 import { activityService } from '../activity/activity.service';
 
 export const dashboardRoutes = Router();
+
 
 dashboardRoutes.use(...requireAdmin);
 

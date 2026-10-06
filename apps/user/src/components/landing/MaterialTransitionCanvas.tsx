@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Fullscreen WebGL shader canvas providing gradient-mesh transition between Hero and Experience sections.
+ *
+ * MAIN RESPONSIBILITY:
+ * Uses Three.js and custom GLSL fragment shaders to render an organic, multi-point color gradient mesh
+ * driven by window scroll progress between the landing Hero and Experience sections.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/TransitionCanvasLoader.tsx
+ * - apps/user/src/app/page.tsx
+ */
+
 "use client";
 
 import { useEffect, useRef } from "react";

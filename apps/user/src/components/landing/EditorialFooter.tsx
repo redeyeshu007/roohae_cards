@@ -1,3 +1,14 @@
+/**
+ * FILE PURPOSE:
+ * Landing page footer component with editorial aesthetic.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders dark grain overlay footer with animated copyright branding and tagline.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/app/page.tsx (Landing page layout)
+ */
+
 "use client";
 
 import React from "react";

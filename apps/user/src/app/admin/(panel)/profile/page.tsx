@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Admin user profile settings page inside user app.
+ *
+ * MAIN RESPONSIBILITY:
+ * Allows admin to update display name and change login password, syncing changes
+ * to the Zustand auth store and invalidating other active sessions.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/api.ts (api client and useAuthStore)
+ * - apps/api/src/modules/auth/auth.routes.ts (PATCH /auth/profile, POST /auth/change-password)
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -15,6 +28,8 @@ export default function ProfilePage() {
   const [savingName, setSavingName] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
 
+  // SAVE NAME HANDLER:
+  // Updates profile name -> PATCH /auth/profile -> updates useAuthStore
   async function saveName(e: React.FormEvent) {
     e.preventDefault();
     setSavingName(true);
@@ -29,6 +44,8 @@ export default function ProfilePage() {
     }
   }
 
+  // CHANGE PASSWORD HANDLER:
+  // Changes password credentials -> POST /auth/change-password
   async function savePassword(e: React.FormEvent) {
     e.preventDefault();
     setSavingPassword(true);
@@ -62,6 +79,8 @@ export default function ProfilePage() {
                 <Label>Email</Label>
                 <Input value={user?.email ?? ''} disabled />
               </div>
+              {/* BUTTON:
+                  Submit name changes */}
               <Button type="submit" loading={savingName}>
                 Save changes
               </Button>
@@ -96,6 +115,8 @@ export default function ProfilePage() {
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
               </div>
+              {/* BUTTON:
+                  Submit password update */}
               <Button type="submit" variant="secondary" loading={savingPassword}>
                 Update password
               </Button>

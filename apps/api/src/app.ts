@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Express application factory and global middleware pipeline setup.
+ *
+ * MAIN RESPONSIBILITY:
+ * Configures Helmet security headers, CORS origins, gzip compression, JSON body limits (30mb for canvas documents),
+ * API rate limiting, local upload static file hosting, /health check, and root /api/v1 router mounting.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/server.ts (invokes createApp() to instantiate server)
+ * - apps/api/src/routes.ts (mounts /api/v1 route tree)
+ * - apps/admin & apps/user (clients connecting through CORS and rate limit gates)
+ */
+
 import path from 'node:path';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -9,6 +23,8 @@ import { env } from './config/env';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
 import { apiRouter } from './routes';
 
+// EXPRESS APPLICATION FACTORY:
+// Constructs and configures the Express web application with all security and routing middleware.
 export function createApp(): Express {
   const app = express();
 

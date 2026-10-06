@@ -1,13 +1,25 @@
-// Shared drawing engine base class – provides common pointer handling, throttling, pressure fallback, 
-// automatic dimension updates and post‑stroke selection. All specific draw tools (Pencil, Pen, Marker, …) 
-// will extend this class and only override style‑specific methods.
+/**
+ * FILE PURPOSE:
+ * Foundation engine for all freehand brush tools in the Roohae Draw Engine.
+ *
+ * MAIN RESPONSIBILITY:
+ * Manages pointer tracking, requestAnimationFrame throttling, simulated or hardware stylus pressure,
+ * dynamic Bézier curve reconstruction, canvas rendering, and post-stroke object finalization.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/tools/draw/* (PencilEngine, DrawPenEngine, MarkerEngine, HighlighterEngine, BrushEngine, ChalkEngine, SprayEngine)
+ * - packages/editor-sdk/src/RoohaeEditor.ts (integrates drawing objects into document history)
+ */
 
 import { Path, Point } from 'fabric';
 import { BaseDrawTool } from './BaseDrawTool';
 import { ToolContext } from '../common/BaseTool';
 import { smoothPathFromPoints } from './utils';
 
+// ABSTRACT DRAW ENGINE:
+// Core interactive loop handling mousedown/mousemove/mouseup for artistic stroke generation.
 export abstract class BaseDrawEngine extends BaseDrawTool {
+
   // Common state
   protected isDrawing = false;
   protected points: Point[] = [];

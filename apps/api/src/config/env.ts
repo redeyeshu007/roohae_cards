@@ -1,6 +1,20 @@
+/**
+ * FILE PURPOSE:
+ * Environment variable schema validation and typed configuration export.
+ *
+ * MAIN RESPONSIBILITY:
+ * Loads process.env using dotenv, validates required secrets (MongoDB URI, JWT secrets, Cloudflare R2 credentials)
+ * using Zod, and exports an immutable typed env object.
+ *
+ * CONNECTED SYSTEMS:
+ * - Entire apps/api codebase (consumes env.* for configuration)
+ */
+
 import 'dotenv/config';
 import { z } from 'zod';
 
+// ENVIRONMENT VALIDATION SCHEMA:
+// Enforces presence and structure of all server environment variables on startup.
 const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),

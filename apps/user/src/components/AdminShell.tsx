@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Navigation shell and sidebar layout for admin control views embedded within the user application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides the persistent navigation frame for /admin/* pages, verifies administrator role
+ * from the user auth store, and handles sign-out and profile routing.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/api.ts (useAuthStore)
+ * - apps/user/src/app/admin/(panel)/* routes
+ */
+
 'use client';
 
 import Link from 'next/link';

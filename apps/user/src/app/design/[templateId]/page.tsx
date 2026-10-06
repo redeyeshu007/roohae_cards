@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Draft template designer page wrapper for un-forked templates.
+ *
+ * MAIN RESPONSIBILITY:
+ * Lazily loads the heavy ProjectEditor component with Fabric.js bundle,
+ * passing templateId to create a transient editing session before persisting as a project.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/ProjectEditor.tsx (ProjectEditor)
+ * - packages/ui/src/editor/EditorSkeleton.tsx
+ */
+
 'use client';
 
 import { use } from 'react';

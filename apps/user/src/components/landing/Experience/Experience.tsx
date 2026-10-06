@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Interactive video experience showcase section on the landing page.
+ *
+ * MAIN RESPONSIBILITY:
+ * Orchestrates typography word-reveal physics, scroll-based parallax transformations,
+ * and hosts the custom VideoPlayer component.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/Experience/VideoPlayer.tsx
+ * - apps/user/src/app/page.tsx
+ */
+
 "use client";
 
 import { motion, useScroll, useTransform, useInView } from "framer-motion";

@@ -1,3 +1,18 @@
+/**
+ * FILE PURPOSE:
+ * Core backend service enforcing customer design integrity and project lifecycle.
+ *
+ * MAIN RESPONSIBILITY:
+ * Implements security assertions: users customize deep copies of published templates
+ * and can never tamper with locked brand elements, add unauthorized objects, or violate placeholder rules.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/projects/projects.routes.ts (receives project save/create requests)
+ * - apps/api/src/modules/projects/project.model.ts (persists customer projects in MongoDB)
+ * - apps/user/src/components/ProjectEditor.tsx (frontend project editor)
+ */
+
+
 import {
   collectAssetIds,
   type CreateProjectInput,

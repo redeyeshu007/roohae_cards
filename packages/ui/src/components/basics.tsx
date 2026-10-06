@@ -1,5 +1,18 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Core primitive UI elements (Button, Input, Textarea, Label, Card, Badge, Separator).
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides unified, styled basic components designed with Roohae's design token palette,
+ * stateful variants (primary, secondary, ghost, danger), focus rings, and loading indicators.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin & apps/user (forms, buttons, and layout cards)
+ * - packages/ui/src/editor/* (editor panels, headers, dialogs, and tool buttons)
+ */
+
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react';
@@ -7,6 +20,10 @@ import * as LabelPrimitive from '@radix-ui/react-label';
 import { cn } from '../lib/cn';
 
 /* ----------------------------------------------------------------- Button */
+
+// BUTTON COMPONENT:
+// Primary interactive button with CVA variants, size presets, and integrated spinning loader state.
+
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-[14px] font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C98B9E]/40 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]',

@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * New user registration and account creation page.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides user account registration form, sends details to POST /api/v1/auth/register,
+ * populates the local useAuthStore session, and redirects to /dashboard.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/api.ts (api client and useAuthStore)
+ * - apps/api/src/modules/auth/auth.routes.ts (POST /api/v1/auth/register)
+ * - apps/user/src/app/(app)/dashboard/page.tsx
+ */
+
 "use client";
 
 import { useState } from "react";
@@ -23,6 +37,8 @@ const jakarta = Plus_Jakarta_Sans({
 
 export default function RegisterPage() {
   const router = useRouter();
+  // AUTH STORE:
+  // Injects user session upon account creation
   const setSession = useAuthStore((s) => s.setSession);
 
   const [name, setName] = useState("");
@@ -31,17 +47,26 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // REGISTRATION SUBMISSION:
+  // FLOW:
+  // Form submission -> submit() -> POST /api/v1/auth/register -> setSession() -> routes to /dashboard
   async function submit() {
     setLoading(true);
     try {
+      // API CONNECTION:
+      // Sends registration payload (name, email, password) to backend auth service
       const res = await api.post<{ success: true; data: LocalAuthPayload }>('/auth/register', {
         name,
         email: regEmail,
         password: regPassword,
       });
       const { user, accessToken, refreshToken } = res.data.data;
+      // STATE UPDATE:
+      // Stores authenticated user profile and JWT tokens
       setSession(user as any, { accessToken, refreshToken });
       
+      // NAVIGATION:
+      // Forwards user to main dashboard
       router.replace('/dashboard');
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -160,6 +185,8 @@ export default function RegisterPage() {
             >
               Password
             </label>
+            {/* BUTTON:
+                Show/Hide Password toggle */}
             <button
               suppressHydrationWarning
               type="button"
@@ -171,6 +198,8 @@ export default function RegisterPage() {
           </div>
 
           <div className="pt-2">
+            {/* BUTTON:
+                Create Account submit button */}
             <button
               suppressHydrationWarning
               type="submit"
@@ -194,6 +223,8 @@ export default function RegisterPage() {
           <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-[#E7DDD6]"></div>
         </div>
 
+        {/* BUTTON:
+            Google Sign-up placeholder button */}
         <button suppressHydrationWarning className="w-full flex items-center justify-center gap-3 bg-transparent border border-[#E7DDD6] text-[#1F1F1F] py-3 px-6 rounded-2xl font-medium text-[14px] transition-all duration-300 hover:bg-white hover:border-transparent hover:-translate-y-1 hover:shadow-[0_8px_20px_rgb(0,0,0,0.06)] focus:outline-none">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

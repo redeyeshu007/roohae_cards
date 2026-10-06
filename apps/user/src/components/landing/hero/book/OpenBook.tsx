@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * 3D Open Book spread structure managing Verso and Recto pages and folding covers.
+ *
+ * MAIN RESPONSIBILITY:
+ * Mounts 3D CSS perspective container, manages thickness layering, spine shadows,
+ * and passes step rotation values to PageTurn leaves.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/book/Book.tsx
+ * - apps/user/src/components/landing/hero/book/PageTurn.tsx
+ */
+
 import React from "react";
 import { SPREADS, FINALE, type PageData } from "./pages";
 import { Cover } from "./Cover";

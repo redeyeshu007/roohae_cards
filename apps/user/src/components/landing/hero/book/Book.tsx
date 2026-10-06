@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * 3D animated interactive book root component for the landing hero.
+ *
+ * MAIN RESPONSIBILITY:
+ * Controls the sequencing state machine (`step` number) driving cover opening, page turning,
+ * pause timings, closure, and accessibility reduced-motion checks.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/book/OpenBook.tsx
+ * - apps/user/src/components/landing/hero/OpeningPage.tsx
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";

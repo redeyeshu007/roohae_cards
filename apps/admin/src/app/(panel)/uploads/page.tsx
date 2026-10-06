@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Central media and graphic asset library management for Roohae Admin.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides drag-and-drop and file input multi-asset uploading, asset type categorization
+ * (all, images, icons), file search, and deletion capabilities.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/queries.ts (useAssets, useUploadAssets, useDeleteAsset)
+ * - packages/shared/src/asset-filters.ts (assetMatchesPanel)
+ * - apps/api/src/modules/assets/assets.routes.ts
+ */
+
 'use client';
 
 import { useRef, useState } from 'react';
@@ -44,14 +58,17 @@ export default function UploadsPage() {
   const [search, setSearch] = useState('');
   const [dragging, setDragging] = useState(false);
 
+  // API QUERIES & MUTATIONS:
+  // Fetches asset library and handles file uploads / deletions
   const { data, isLoading } = useAssets({ kind: PANEL_KIND[panel], search });
   const uploadMutation = useUploadAssets();
   const deleteMutation = useDeleteAsset();
 
   const visibleAssets = (data?.items ?? []).filter((asset) => assetMatchesPanel(asset, panel));
 
+  // FILE UPLOAD HANDLER:
+  // Converts FileList to Array and triggers uploadMutation (POST /api/v1/assets)
   function handleFiles(files: FileList | File[]) {
-    // Snapshot into a real array — a live FileList empties when the input is reset.
     const picked = Array.from(files);
     if (!picked.length) return;
     uploadMutation.mutate({ files: picked });
@@ -75,6 +92,10 @@ export default function UploadsPage() {
                 e.target.value = '';
               }}
             />
+            {/* BUTTON:
+                Upload assets
+                CALLS:
+                fileInputRef.current.click() */}
             <Button
               loading={uploadMutation.isPending}
               onClick={() => fileInputRef.current?.click()}
@@ -85,7 +106,8 @@ export default function UploadsPage() {
         }
       />
 
-      {/* Drop zone */}
+      {/* DROP ZONE:
+          Drag-and-drop file upload target */}
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -107,6 +129,8 @@ export default function UploadsPage() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* TABS:
+            Switch between All, Images, and Icons filters */}
         <Tabs value={panel} onValueChange={(v) => setPanel(v as AssetPanelType)}>
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
@@ -144,7 +168,7 @@ export default function UploadsPage() {
             return (
               <Card key={asset.id} className="group overflow-hidden">
                 <div className="relative aspect-square bg-slate-50 dark:bg-slate-800">
-                    /* eslint-disable-next-line @next/next/no-img-element */
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={thumb ?? asset.url}
                       alt={asset.originalName}
@@ -154,14 +178,20 @@ export default function UploadsPage() {
                   <div className="absolute right-1.5 top-1.5 opacity-0 transition-opacity group-hover:opacity-100">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
+                        {/* BUTTON:
+                            Asset action dropdown trigger */}
                         <Button variant="outline" size="icon-sm">
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        {/* BUTTON:
+                            Open asset original full-resolution URL in new tab */}
                         <DropdownMenuItem onSelect={() => window.open(asset.url, '_blank')}>
                           View original
                         </DropdownMenuItem>
+                        {/* BUTTON:
+                            Delete asset -> DELETE /api/v1/assets/:id */}
                         <DropdownMenuItem destructive onSelect={() => deleteMutation.mutate(asset.id)}>
                           Delete
                         </DropdownMenuItem>

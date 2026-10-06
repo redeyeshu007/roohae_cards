@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * End-user client API network configuration and authentication store initialization.
+ *
+ * MAIN RESPONSIBILITY:
+ * Sets up the Axios API client configured with user token refresh interceptors,
+ * user authentication persistence in localStorage ('roohae-user-auth'), and session expiry redirect.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/lib/api.ts (createApiClient)
+ * - packages/ui/src/lib/auth-store.ts (createAuthStore)
+ * - apps/api (HTTP backend server)
+ */
+
 'use client';
 
 import { createApiClient, createAuthStore } from '@roohae/ui';

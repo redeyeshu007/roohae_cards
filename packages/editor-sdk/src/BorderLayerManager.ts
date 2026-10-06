@@ -1,3 +1,24 @@
+/**
+ * FILE PURPOSE:
+ * Roohae Border Engine & PageBorder custom Fabric.js element class.
+ *
+ * MAIN RESPONSIBILITY:
+ * Implements procedural page border generation with mathematically locked geometry.
+ * Solves the critical Fabric.js bounding box distortion bug by forcing native strokeWidth = 0
+ * and rendering border stroke thickness internally within custom cache and dimensions.
+ *
+ * CRITICAL ARCHITECTURAL RULES:
+ * 1. Do NOT set native Fabric strokeWidth > 0 on PageBorder. This would distort selection bounding boxes.
+ * 2. Origin is centered: (docWidth / 2, docHeight / 2) with originX: 'center' and originY: 'center'.
+ * 3. Padding scales symmetrically: width = docWidth - padding * 2, height = docHeight - padding * 2.
+ * 4. Procedural miters: Dashed borders render solid corner squares to guarantee crisp print edges.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/RoohaeEditor.ts (registers PageBorder class and invokes border actions)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Borders & Lines tool UI)
+ * - packages/ui/src/editor/PropertiesPanel.tsx (Border thickness, padding, style controls)
+ */
+
 import { FabricObject, classRegistry, Point } from 'fabric';
 import { defaultName, newObjectId } from './serialization';
 
@@ -172,13 +193,20 @@ export class PageBorder extends FabricObject {
 // Register class for serialization and history restore
 classRegistry.setClass(PageBorder, 'PageBorder');
 
+// BORDER ENGINE:
+// Procedural Border Layer Manager providing factory creation and atomic property updates.
 export class BorderLayerManager {
+  // BORDER CREATION:
+  // Creates a new PageBorder object positioned at the canvas center with custom geometry.
+  // Flow: ToolsPanel Borders button → editor.addBorder() → BorderLayerManager.createBorderLayer()
   static createBorderLayer(docWidth: number, docHeight: number, config: BorderStyleConfig): FabricObject {
     const { padding, thickness, strokeColor, opacity, dashArray } = config;
 
     const w = docWidth - padding * 2;
     const h = docHeight - padding * 2;
 
+    // BORDER OBJECT:
+    // PageBorder instance with strokeWidth=0 to prevent Fabric bounding-box drift.
     const border = new PageBorder({
       id: newObjectId(),
       name: defaultName('Border'),
@@ -219,6 +247,9 @@ export class BorderLayerManager {
     return border;
   }
 
+  // BORDER PADDING:
+  // Updates the inset padding of the border layer symmetrically from the document canvas boundaries.
+  // Controlled by: PropertiesPanel Border Inset/Padding slider.
   static updateBorderPadding(borderLayer: FabricObject, padding: number, docWidth: number, docHeight: number): void {
     const w = docWidth - padding * 2;
     const h = docHeight - padding * 2;
@@ -236,6 +267,9 @@ export class BorderLayerManager {
     borderLayer.setCoords();
   }
 
+  // BORDER THICKNESS:
+  // Updates the existing border thickness property without modifying native strokeWidth.
+  // Controlled by: PropertiesPanel Border Thickness slider.
   static updateBorderThickness(borderLayer: FabricObject, thickness: number): void {
     // Mutate ONLY our custom thickness variable! Native strokeWidth remains 0.
     borderLayer.set({ roohBorderThickness: thickness, dirty: true } as any);
@@ -244,11 +278,17 @@ export class BorderLayerManager {
     borderLayer.setCoords();
   }
 
+  // BORDER COLOR:
+  // Updates stroke color of the procedural border element.
+  // Controlled by: PropertiesPanel Color picker.
   static updateBorderColor(borderLayer: FabricObject, color: string): void {
     borderLayer.set({ stroke: color });
     borderLayer.setCoords();
   }
 
+  // BORDER STYLE (SOLID / DASHED / DOTTED):
+  // Updates stroke style dash array configuration for procedural dashed or dotted border rendering.
+  // Controlled by: PropertiesPanel Style toggle (solid, dashed, dotted).
   static updateBorderStyle(borderLayer: FabricObject, style: 'solid' | 'dashed' | 'dotted', dashArray: number[] | null): void {
     borderLayer.set({ strokeDashArray: dashArray, dirty: true } as any);
     borderLayer.setCoords();

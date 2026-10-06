@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Showcase HTML5 video player component with smooth audio fading and responsive container.
+ *
+ * MAIN RESPONSIBILITY:
+ * Mounts looping brand video, manages 600ms exponential audio fade-in/fade-out toggles,
+ * and renders loading spinner overlays.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/Experience/Experience.tsx
+ * - apps/user/src/components/landing/Experience/SoundToggle.tsx
+ */
+
 "use client";
 
 import { useRef, useState, useEffect } from "react";

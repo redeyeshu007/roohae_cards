@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Floating overlay and modal presentation primitives (Dialog, DropdownMenu, Popover, Tooltip).
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides accessible, animated Radix UI overlay wrappers styled with Roohae's warm aesthetic,
+ * backdrop blurs, and portal positioning.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/TopBar.tsx (Export dropdown menu, Preview dialog modal)
+ * - packages/ui/src/editor/ContextMenu.tsx (context menu dropdowns)
+ * - apps/admin & apps/user (creation modals, action dropdowns, and confirmation prompts)
+ */
+
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import * as DropdownPrimitive from '@radix-ui/react-dropdown-menu';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
@@ -9,7 +23,8 @@ import { forwardRef, type ReactNode } from 'react';
 import { cn } from '../lib/cn';
 
 /* ----------------------------------------------------------------- Dialog */
-
+// OVERLAY: DIALOG / MODAL
+// Modal window container for previews, template creation forms, and confirmations.
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogClose = DialogPrimitive.Close;

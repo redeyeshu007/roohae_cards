@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Express route declarations for category browsing and administrative CRUD.
+ *
+ * MAIN RESPONSIBILITY:
+ * Exposes GET / (browse active categories with pagination), GET /:id,
+ * and admin-guarded POST, PATCH, and DELETE operations for category maintenance.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/routes.ts (mounts categoriesRoutes at /api/v1/categories)
+ * - apps/api/src/modules/categories/categories.service.ts (business logic)
+ * - apps/admin & apps/user (category dropdowns and filters)
+ */
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { createCategorySchema, updateCategorySchema } from '@roohae/shared';
@@ -7,6 +20,7 @@ import { asyncHandler, buildMeta, ok, parsePagination } from '../../lib/http';
 import { categoriesService } from './categories.service';
 
 export const categoriesRoutes = Router();
+
 
 // Any authenticated user can browse active categories (template gallery filters).
 categoriesRoutes.get(

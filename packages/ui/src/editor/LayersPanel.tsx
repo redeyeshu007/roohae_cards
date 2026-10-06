@@ -1,5 +1,18 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Visual canvas object hierarchy list and z-index ordering panel.
+ *
+ * MAIN RESPONSIBILITY:
+ * Displays all canvas objects on the active page ordered by visual stack depth,
+ * enabling selection, inline renaming, visibility toggling (Eye icon), and lock toggling (Padlock icon).
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/LeftSidebar.tsx (renders LayersPanel when Layers tab is selected)
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls selectObject, renameObject, setObjectVisibility, setObjectLock)
+ */
+
 import { Eye, EyeOff, Image as ImageIcon, Lock, LockOpen, Shapes, Type } from 'lucide-react';
 import { useState } from 'react';
 import type { LayerEntry, RoohaeEditor } from '@roohae/editor-sdk';
@@ -12,6 +25,8 @@ function layerIcon(type: string) {
   return <Shapes className="h-3.5 w-3.5" />;
 }
 
+// LAYERS PANEL:
+// Renders layer list with selection, renaming, hide/show, and lock/unlock controls.
 export function LayersPanel({
   editor,
   layers,

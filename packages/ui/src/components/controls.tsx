@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Form control primitives (Select, Slider, Switch, Tabs).
+ *
+ * MAIN RESPONSIBILITY:
+ * Styled Radix UI primitives wrapping Select dropdowns, Sliders (opacity, font size, border thickness),
+ * Switches (toggle boolean flags), and Tabs for editor properties panels.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/PropertiesPanel.tsx (uses Slider for thickness/opacity/size, Select for fonts)
+ * - packages/ui/src/editor/ToolsPanel.tsx (uses Tabs for tool switching)
+ * - apps/admin & apps/user (forms and panels)
+ */
+
 import * as SelectPrimitive from '@radix-ui/react-select';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
@@ -9,7 +23,8 @@ import { forwardRef } from 'react';
 import { cn } from '../lib/cn';
 
 /* ----------------------------------------------------------------- Select */
-
+// CONTROL: SELECT DROPDOWN
+// Custom dropdown menu for font family, units, alignment, and categories.
 export const Select = SelectPrimitive.Root;
 export const SelectValue = SelectPrimitive.Value;
 

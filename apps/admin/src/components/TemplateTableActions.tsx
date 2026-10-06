@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Action menu dropdown component for template rows in the admin templates table.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides quick actions to edit design in editor, toggle publish/draft status,
+ * duplicate template, preview thumbnail, and delete template with confirmation.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/queries.ts (useSetTemplateStatus, useDuplicateTemplate, useDeleteTemplate)
+ * - apps/admin/src/app/editor/[templateId]/page.tsx (navigates to editor route)
+ * - apps/admin/src/app/(panel)/templates/page.tsx (parent table view)
+ */
+
 'use client';
 
 import { useState } from 'react';

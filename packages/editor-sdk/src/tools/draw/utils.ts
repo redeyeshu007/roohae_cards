@@ -1,9 +1,24 @@
+/**
+ * FILE PURPOSE:
+ * Mathematical utilities and path smoothing algorithms for the Roohae Draw Engine.
+ *
+ * MAIN RESPONSIBILITY:
+ * Computes midpoints, Euclidean distances, random intervals for spray/chalk textures,
+ * and converts discrete pointer input coordinates into smooth quadratic Bézier curves.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/tools/draw/* (utilized by BrushEngine, DrawPenEngine, ChalkEngine, etc.)
+ */
+
 import { Point } from 'fabric';
 
 /**
  * Calculates a midpoint between two points.
  */
+// MIDPOINT CALCULATOR:
+// Used in Bézier curve generation to average consecutive sampled pointer positions.
 export function getMidPoint(p1: Point, p2: Point): Point {
+
   return new Point(p1.x + (p2.x - p1.x) / 2, p1.y + (p2.y - p1.y) / 2);
 }
 

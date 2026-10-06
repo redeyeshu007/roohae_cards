@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Landing page hero 3D book spread data catalog and page types.
+ *
+ * MAIN RESPONSIBILITY:
+ * Defines page theme color palettes, typography variables, titles, and decorative accents
+ * for every turning sheet in the interactive opening book sequence.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/book/Book.tsx
+ * - apps/user/src/components/landing/hero/book/Page.tsx
+ * - apps/user/src/components/landing/hero/book/Writing.tsx
+ */
+
 export type DetailType =
   | "gold-foil-underline"
   | "ink-flourish"

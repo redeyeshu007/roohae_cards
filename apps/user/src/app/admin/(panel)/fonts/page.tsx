@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Brand font management and upload interface for admin inside user app.
+ *
+ * MAIN RESPONSIBILITY:
+ * Lists installed brand font families and weights, enables multipart font file upload
+ * (.otf, .ttf, .woff, .woff2), dynamically registers faces via loadFonts(), and supports deletion.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/admin-queries.ts (useFonts, useUploadFont, useDeleteFont)
+ * - packages/editor-sdk/src/fonts.ts (loadFonts)
+ * - apps/api/src/modules/fonts/fonts.routes.ts
+ */
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -31,6 +45,8 @@ export default function FontsPage() {
     if (fonts?.length) void loadFonts(fonts);
   }, [fonts]);
 
+  // SUBMIT FLOW:
+  // Form submission -> uploadMutation -> POST /api/v1/fonts (FormData) -> resets dialog
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!files.length) return;
@@ -47,6 +63,8 @@ export default function FontsPage() {
         description="Brand typefaces available in the editor. Supports OTF, TTF, WOFF and WOFF2."
         breadcrumb="Admin / Fonts"
         actions={
+          // BUTTON:
+          // Open upload font dialog
           <Button onClick={() => setOpen(true)}>
             <Plus className="h-4 w-4" /> Upload font
           </Button>
@@ -82,6 +100,8 @@ export default function FontsPage() {
                     {font.faces.map((f) => f.weight).join(', ')}
                   </p>
                 </div>
+                {/* BUTTON:
+                    Delete font family */}
                 <Button
                   variant="ghost"
                   size="icon-sm"
@@ -102,6 +122,7 @@ export default function FontsPage() {
         </div>
       )}
 
+      {/* UPLOAD FONT DIALOG */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           title="Upload font family"

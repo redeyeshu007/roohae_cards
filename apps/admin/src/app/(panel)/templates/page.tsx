@@ -1,3 +1,19 @@
+/**
+ * FILE PURPOSE:
+ * Template management catalog and creation interface for Roohae Admin.
+ *
+ * MAIN RESPONSIBILITY:
+ * Lists all design templates with status filtering (draft/published/archived) and search,
+ * supports creating new templates via modal dialog with preset category dimensions,
+ * and launches the full-screen canvas editor.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/queries.ts (useTemplates, useCreateTemplate, useCategories)
+ * - apps/admin/src/components/TemplateTableActions.tsx (Row action menu)
+ * - apps/admin/src/app/editor/[templateId]/page.tsx (Opens editor route upon creation)
+ * - apps/api/src/modules/templates/templates.routes.ts
+ */
+
 'use client';
 
 import { memo, useMemo, useState } from 'react';
@@ -39,10 +55,18 @@ const STATUS_BADGE: Record<TemplateStatus, 'success' | 'warning' | 'muted'> = {
 
 export default function TemplatesPage() {
   const router = useRouter();
+  // FILTER STATE:
+  // Tracks active status tab ('all', 'draft', 'published', 'archived')
   const [status, setStatus] = useState<string>('all');
+  // SEARCH STATE:
+  // Tracks user text search query
   const [search, setSearch] = useState('');
+  // MODAL STATE:
+  // Controls visibility of CreateTemplateDialog
   const [createOpen, setCreateOpen] = useState(false);
 
+  // API QUERY:
+  // Fetches filtered templates from GET /api/v1/templates
   const { data, isLoading } = useTemplates({
     status: status === 'all' ? undefined : status,
     search,
@@ -54,6 +78,12 @@ export default function TemplatesPage() {
         title="Templates"
         description="Design templates users can customize. Only published templates are visible to users."
         actions={
+          // BUTTON:
+          // Create template
+          // USE:
+          // Opens dialog to define new template title, category and canvas dimensions
+          // CALLS:
+          // setCreateOpen(true)
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" /> Create template
           </Button>
@@ -61,6 +91,8 @@ export default function TemplatesPage() {
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* TABS:
+            Filter templates by published/draft/archived status */}
         <Tabs value={status} onValueChange={setStatus}>
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
@@ -92,6 +124,8 @@ export default function TemplatesPage() {
           title="No templates found"
           description="Create a template from a category to get started."
           action={
+            // BUTTON:
+            // Empty state create button
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="h-4 w-4" /> Create template
             </Button>
@@ -158,6 +192,8 @@ export default function TemplatesPage() {
                       </Badge>
                     </td>
                     <td className="px-6 py-3.5 text-right">
+                      {/* ROW ACTIONS:
+                          Duplicate, publish/unpublish, edit, delete actions */}
                       <TemplateTableActions template={template} />
                     </td>
                   </tr>
@@ -168,6 +204,8 @@ export default function TemplatesPage() {
         </Card>
       )}
 
+      {/* CREATE MODAL:
+          Dialog to configure title, category and dimensions */}
       <CreateTemplateDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
   );
@@ -185,7 +223,11 @@ function CreateTemplateDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const router = useRouter();
+  // API QUERIES:
+  // Fetches category list to populate category dropdown
   const { data: categories } = useCategories();
+  // API MUTATION:
+  // Creates template on backend (POST /api/v1/templates)
   const createMutation = useCreateTemplate();
 
   const [title, setTitle] = useState('');
@@ -198,16 +240,20 @@ function CreateTemplateDialog({
     [categories, categoryId],
   );
 
+  // CATEGORY AUTO-FILL HANDLER:
+  // Pre-fills width and height according to selected category standard dimensions
   function onCategoryChange(id: string) {
     setCategoryId(id);
     const category = categories?.find((c) => c.id === id);
     if (category) {
-      // Auto-fill from the category — still editable before creation.
       setWidth(String(category.width));
       setHeight(String(category.height));
     }
   }
 
+  // SUBMIT HANDLER:
+  // SUBMIT FLOW:
+  // Form submission -> createMutation.mutateAsync -> POST /api/v1/templates -> redirects to /editor/[id]
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!selected) return;
@@ -221,6 +267,8 @@ function CreateTemplateDialog({
       tags: [],
     });
     onOpenChange(false);
+    // NAVIGATION:
+    // Opens editor canvas with newly created template
     router.push(`/editor/${template.id}`);
   }
 
@@ -284,9 +332,13 @@ function CreateTemplateDialog({
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
+            {/* BUTTON:
+                Cancel button to dismiss dialog */}
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
+            {/* BUTTON:
+                Submit creation and route to editor */}
             <Button type="submit" disabled={!selected} loading={createMutation.isPending}>
               Create & open editor
             </Button>

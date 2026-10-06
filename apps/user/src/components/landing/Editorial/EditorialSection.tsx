@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Landing page editorial interactive accordion/brand philosophy section.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders four core brand pillars (IDEAS, DESIGN, CUSTOMIZE, PRINT) with smooth hover state animations,
+ * descriptions, and lazy-loaded WebGL canvas backdrop.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/Editorial/EditorialCanvas.tsx
+ * - apps/user/src/app/page.tsx
+ */
+
 "use client";
 
 import { useRef, useState, useEffect, lazy, Suspense } from "react";

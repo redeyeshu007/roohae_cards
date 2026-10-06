@@ -1,11 +1,26 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Bottom page strip and canvas viewport zoom control bar.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides multi-page card navigation (switching between Front and Back page sides),
+ * page management actions for admins (Add, Duplicate, Delete page), and viewport zoom percentage controls.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/EditorWorkspace.tsx (renders PagesBar at the bottom)
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls setActivePage, addPage, duplicatePage, deletePage, zoom methods)
+ */
+
 import { ChevronLeft, ChevronRight, Copy, Plus, Trash2 } from 'lucide-react';
 import type { PageEntry, RoohaeEditor } from '@roohae/editor-sdk';
 import { cn } from '../lib/cn';
 import { Button } from '../components/basics';
 import { Tip } from '../components/overlays';
 
+// PAGES BAR COMPONENT:
+// Bottom navigation footer managing page selection, card front/back flips, and zoom controls.
 export function PagesBar({
   editor,
   pages,

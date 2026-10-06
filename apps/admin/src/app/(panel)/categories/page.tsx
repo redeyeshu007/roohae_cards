@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Design format categories management page for Roohae Admin.
+ *
+ * MAIN RESPONSIBILITY:
+ * Lists all card/design categories with canvas dimensions, orientation, and template counts;
+ * supports creating, updating, and deleting categories with default unit measurements.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/queries.ts (useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory)
+ * - apps/api/src/modules/categories/categories.routes.ts
+ * - apps/admin/src/components/AdminShell.tsx (PageHeader)
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -49,17 +63,23 @@ export default function CategoriesPage() {
   const [editing, setEditing] = useState<Category | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
+  // API QUERIES & MUTATIONS:
+  // Category CRUD query hooks
   const { data: categories, isLoading } = useCategories(search);
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
   const deleteMutation = useDeleteCategory();
 
+  // DIALOG HANDLER:
+  // Opens modal for new category creation
   function openCreate() {
     setEditing(null);
     setForm(EMPTY_FORM);
     setOpen(true);
   }
 
+  // DIALOG HANDLER:
+  // Opens modal for editing existing category
   function openEdit(category: Category) {
     setEditing(category);
     setForm({
@@ -72,6 +92,9 @@ export default function CategoriesPage() {
     setOpen(true);
   }
 
+  // SUBMIT HANDLER:
+  // SUBMIT FLOW:
+  // Form submission -> updateMutation/createMutation -> PATCH or POST /api/v1/categories -> closes modal
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const payload = {
@@ -95,6 +118,10 @@ export default function CategoriesPage() {
         title="Categories"
         description="Design formats users can browse — each defines a default canvas size."
         actions={
+          // BUTTON:
+          // New category
+          // CALLS:
+          // openCreate()
           <Button onClick={openCreate}>
             <Plus className="h-4 w-4" /> New category
           </Button>
@@ -124,6 +151,8 @@ export default function CategoriesPage() {
           title="No categories yet"
           description="Create your first category — e.g. Instagram Post, Business Card, Certificate."
           action={
+            // BUTTON:
+            // Empty state category creation button
             <Button onClick={openCreate}>
               <Plus className="h-4 w-4" /> New category
             </Button>
@@ -146,13 +175,19 @@ export default function CategoriesPage() {
                 />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
+                    {/* BUTTON:
+                        Category options menu trigger */}
                     <Button variant="ghost" size="icon-sm">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    {/* BUTTON:
+                        Edit category item */}
                     <DropdownMenuItem onSelect={() => openEdit(category)}>Edit</DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    {/* BUTTON:
+                        Delete category action -> DELETE /api/v1/categories/:id */}
                     <DropdownMenuItem
                       destructive
                       onSelect={() => deleteMutation.mutate(category.id)}
@@ -174,6 +209,8 @@ export default function CategoriesPage() {
         </div>
       )}
 
+      {/* MODAL:
+          Category creation and edit dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           title={editing ? 'Edit category' : 'New category'}
@@ -250,9 +287,13 @@ export default function CategoriesPage() {
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">
+              {/* BUTTON:
+                  Cancel dialog */}
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
+              {/* BUTTON:
+                  Submit category create/update */}
               <Button type="submit" loading={createMutation.isPending || updateMutation.isPending}>
                 {editing ? 'Save changes' : 'Create category'}
               </Button>

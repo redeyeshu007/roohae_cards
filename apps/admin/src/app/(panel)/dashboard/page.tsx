@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Roohae Admin Dashboard analytics overview page.
+ *
+ * MAIN RESPONSIBILITY:
+ * Fetches and displays platform statistics (total users, templates, published count, categories,
+ * assets, fonts), recent system activity audit logs, and total user project count.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/queries.ts (useDashboardStats hook -> GET /api/v1/dashboard/stats)
+ * - apps/api/src/modules/dashboard/dashboard.routes.ts
+ * - apps/admin/src/components/AdminShell.tsx (PageHeader)
+ */
+
 'use client';
 
 import {
@@ -23,6 +37,8 @@ const STATS = [
 ] as const;
 
 export default function DashboardPage() {
+  // API QUERY:
+  // Fetches aggregated platform metrics and recent audit activity logs from /dashboard/stats
   const { data, isLoading } = useDashboardStats();
 
   return (
@@ -32,6 +48,7 @@ export default function DashboardPage() {
         description="An overview of your design platform at a glance."
       />
 
+      {/* Metrics Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {STATS.map(({ key, label, icon: Icon, tint }, i) => (
           <motion.div
@@ -58,6 +75,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Recent Activity Log List */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Recent activity</CardTitle>
@@ -91,6 +109,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
+        {/* User Projects Counter */}
         <Card>
           <CardHeader>
             <CardTitle>User projects</CardTitle>

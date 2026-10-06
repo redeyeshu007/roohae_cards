@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Mongoose schema and model definition for user accounts in the Roohae system.
+ *
+ * MAIN RESPONSIBILITY:
+ * Defines user authentication credentials (email, hashed password, tokenVersion for revocation),
+ * profile information (name, avatar, role, permissions), account status, and sanitized JSON serialization.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/users/user.repository.ts (queries and updates user records)
+ * - apps/api/src/modules/auth/auth.service.ts (verifies password hash and generates JWTs)
+ * - packages/shared/src/types/entities.ts (User TypeScript interface)
+ */
+
 import { Schema, model, type HydratedDocument, type Model } from 'mongoose';
 import { ROLES, type Role } from '@roohae/shared';
 

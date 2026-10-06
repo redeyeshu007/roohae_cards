@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * React hook encapsulation for the RoohaeEditor engine lifecycle.
+ *
+ * MAIN RESPONSIBILITY:
+ * Mounts the Fabric canvas instance, wires bi-directional event synchronization
+ * into reactive React state (selection, layers, pages, zoom, history), handles StrictMode cleanups,
+ * and exposes debounced autosave triggers.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/EditorWorkspace.tsx (calls useRoohaeEditor to bind canvas)
+ * - packages/editor-sdk/src/RoohaeEditor.ts (instantiated and managed by this hook)
+ */
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DesignDocument } from '@roohae/shared';
 import { RoohaeEditor } from '../RoohaeEditor';
@@ -9,6 +23,7 @@ import type {
   PageEntry,
   SelectionState,
 } from '../types';
+
 
 export interface UseRoohaeEditorArgs {
   mode: EditorMode;
@@ -82,17 +97,25 @@ export function useRoohaeEditor(args: UseRoohaeEditorArgs): UseRoohaeEditorResul
       const doc = documentRef.current;
       if (cancelled || !doc) return;
 
+      // EDITOR CANVAS:
+      // Initializes the existing design canvas used by Roohae Editor.
       instance = new RoohaeEditor(el, {
         mode,
         document: doc,
         resolveAsset: (id) => resolveRef.current(id),
       });
 
+      // SELECTION:
+      // Handles the currently selected canvas object and mirrors changes into React state.
       instance.on('selection:change', setSelection);
       instance.on('layers:change', setLayers);
       instance.on('pages:change', setPages);
       instance.on('zoom:change', setZoom);
+      // HISTORY:
+      // Tracks canUndo/canRedo flags from HistoryManager to enable/disable TopBar buttons.
       instance.on('history:change', setHistory);
+      // AUTOSAVE TRIGGER:
+      // Dispatches debounced document modification notification to consumer pages.
       instance.on('document:change', () => changeCbRef.current?.());
 
       await instance.init();

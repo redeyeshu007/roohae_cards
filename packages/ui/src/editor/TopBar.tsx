@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Top navigation and primary action header for the editor workspace.
+ *
+ * MAIN RESPONSIBILITY:
+ * Displays document title, breadcrumbs, history controls (Undo/Redo),
+ * real-time autosave indicators, and action triggers (Preview, Export, Publish).
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/EditorWorkspace.tsx
+ * - packages/editor-sdk (RoohaeEditor undo/redo actions)
+ * - apps/admin & apps/user (handles onBack, onPreview, and title mutations)
+ */
+
 import { ArrowLeft, Check, ChevronRight, CloudUpload, Keyboard, Loader2, Monitor, Redo2, Share2, Undo2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { RoohaeEditor } from '@roohae/editor-sdk';
@@ -48,6 +62,27 @@ export function EditorTopBar({
 
       {/* ── Left: back + breadcrumb + undo/redo ── */}
       <div className="flex flex-1 items-center gap-3">
+        {/**
+         * BUTTON: Back
+         *
+         * LOCATION:
+         * TopBar Left Rail
+         *
+         * COMPONENT:
+         * EditorTopBar (Button)
+         *
+         * CLICK HANDLER:
+         * onBack()
+         *
+         * FLOW:
+         * Button
+         * → onBack()
+         * → persist(true) [Triggered by parent page]
+         * → router.push('/templates' or '/projects')
+         *
+         * PURPOSE:
+         * Saves any pending changes and navigates user back to the list view.
+         */ }
         <Tip label="Back to templates">
           <Button
             variant="ghost"
@@ -71,6 +106,29 @@ export function EditorTopBar({
 
         {/* Undo / Redo */}
         <div className="flex items-center gap-0.5">
+          {/**
+           * BUTTON: Undo
+           *
+           * LOCATION:
+           * TopBar History Group
+           *
+           * COMPONENT:
+           * EditorTopBar (Button)
+           *
+           * CLICK HANDLER:
+           * editor?.undo()
+           *
+           * FLOW:
+           * Button
+           * → editor?.undo()
+           * → HistoryManager.undo()
+           * → canvas.loadFromJSON(previousSnapshot)
+           * → canvas.renderAll()
+           * → emitter.emit('history:change')
+           *
+           * PURPOSE:
+           * Reverts canvas state to the preceding snapshot in the history stack.
+           */ }
           <Tip label="Undo (Ctrl+Z)">
             <Button
               variant="ghost"
@@ -83,6 +141,30 @@ export function EditorTopBar({
               <Undo2 className="h-4 w-4" />
             </Button>
           </Tip>
+
+          {/**
+           * BUTTON: Redo
+           *
+           * LOCATION:
+           * TopBar History Group
+           *
+           * COMPONENT:
+           * EditorTopBar (Button)
+           *
+           * CLICK HANDLER:
+           * editor?.redo()
+           *
+           * FLOW:
+           * Button
+           * → editor?.redo()
+           * → HistoryManager.redo()
+           * → canvas.loadFromJSON(nextSnapshot)
+           * → canvas.renderAll()
+           * → emitter.emit('history:change')
+           *
+           * PURPOSE:
+           * Re-applies the next forward snapshot from the redo history stack.
+           */ }
           <Tip label="Redo (Ctrl+Y)">
             <Button
               variant="ghost"
@@ -129,6 +211,30 @@ export function EditorTopBar({
 
         {/* Preview */}
         {onPreview && (
+          /**
+           * BUTTON: Preview
+           *
+           * LOCATION:
+           * TopBar Right Rail Actions
+           *
+           * COMPONENT:
+           * EditorTopBar (Button)
+           *
+           * CLICK HANDLER:
+           * onPreview()
+           *
+           * FLOW:
+           * Button
+           * → onPreview()
+           * → openPreview() [in TemplateEditorPage / ProjectEditor]
+           * → ExportService.preview(doc, pageIndex)
+           * → StaticCanvas offscreen render
+           * → setPreviewUrls(urls) & setPreviewOpen(true)
+           * → Dialog modal opens with card flip inspection
+           *
+           * PURPOSE:
+           * Renders and opens the multi-page design in a modal dialog.
+           */
           <Tip label="Preview design">
             <Button
               variant="ghost"

@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Customer image placeholder replacement and gallery browser panel.
+ *
+ * MAIN RESPONSIBILITY:
+ * Lists admin-curated image placeholders marked as editable, allowing end users to swap images
+ * via pre-approved gallery collections or bounded custom uploads, replacing project copies safely.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/LeftSidebar.tsx (renders PlaceholdersPanel in user mode)
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls editor.replaceImage)
+ * - apps/user/src/components/ProjectEditor.tsx (supplies uploadReplacement handler)
+ */
+
 import { CheckCircle2, Images, ImageIcon, Upload } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';

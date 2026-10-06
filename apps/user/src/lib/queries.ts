@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * React Query hooks for end-user data fetching, caching, and mutation operations.
+ *
+ * MAIN RESPONSIBILITY:
+ * Manages queries for categories, published templates, user project list, individual projects,
+ * typography fonts, asset resolution, project creation from template, saving project documents, and image replacements.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/api.ts (Axios network client)
+ * - apps/user/src/app/(app)/* and editor pages
+ * - packages/shared data types
+ */
+
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

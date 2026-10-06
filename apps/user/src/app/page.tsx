@@ -1,3 +1,19 @@
+/**
+ * FILE PURPOSE:
+ * Roohae public marketing landing page and interactive brand showcase.
+ *
+ * MAIN RESPONSIBILITY:
+ * Composes the interactive 3D hero book opening page, video/sound experience reel,
+ * editorial section showcase, floating navigation bar, and footer.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/FloatingNav.tsx
+ * - apps/user/src/components/landing/hero/OpeningPage.tsx
+ * - apps/user/src/components/landing/Experience/Experience.tsx
+ * - apps/user/src/components/landing/Editorial/EditorialSection.tsx
+ * - apps/user/src/components/landing/EditorialFooter.tsx
+ */
+
 import { OpeningPage } from "@/components/landing/hero/OpeningPage";
 import { Experience } from "@/components/landing/Experience/Experience";
 import { FloatingNav } from "@/components/landing/FloatingNav";

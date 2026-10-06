@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Core entity model definitions for all domain resources in the Roohae platform.
+ *
+ * MAIN RESPONSIBILITY:
+ * Defines TypeScript interfaces for User, Category, Asset, Font, Template,
+ * Project, and ActivityLog entities stored in MongoDB and exchanged via APIs.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/* (Mongoose document interfaces)
+ * - packages/shared/src/types/api.ts (API payloads)
+ * - apps/admin & apps/user (UI types and queries)
+ */
+
 import type {
   AssetKind,
   MeasurementUnit,

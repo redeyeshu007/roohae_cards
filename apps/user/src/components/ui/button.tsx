@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Base UI Button primitive component wrapper with Class Variance Authority styling.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides standardized accessible button component supporting variants (default, outline,
+ * secondary, ghost, destructive, link) and sizes (default, xs, sm, lg, icon, icon-xs, icon-sm, icon-lg).
+ *
+ * CONNECTED SYSTEMS:
+ * - @base-ui/react/button (Button primitive)
+ * - apps/user/src/lib/utils.ts (cn utility)
+ */
+
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 

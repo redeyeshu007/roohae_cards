@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Root HTML shell and global font/theme provider layout for the Roohae User application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Configures Google Web Fonts (Plus Jakarta Sans, calligraphic/handwriting display faces),
+ * registers AppProviders (TanStack React Query, Tooltip, Sonner toasts), NextThemes, and Framer Motion config.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/lib/providers.tsx (AppProviders)
+ * - apps/user/src/app/globals.css
+ * - All child routes in apps/user
+ */
+
 import type { Metadata, Viewport } from 'next';
 import {
   Plus_Jakarta_Sans,

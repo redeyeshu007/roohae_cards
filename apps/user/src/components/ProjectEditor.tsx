@@ -1,3 +1,20 @@
+/**
+ * FILE PURPOSE:
+ * Core customization environment for end-users in draft and saved project modes.
+ *
+ * MAIN RESPONSIBILITY:
+ * 1. DRAFT MODE (/design/[templateId]): Temporary session loaded from published master template.
+ *    Autosave is disabled until first manual Save creates the project.
+ * 2. SAVED MODE (/editor/[projectId]): Loaded from user's personal project copy.
+ *    Autosave continuously syncs mutations to API every 4 seconds.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/app/design/[templateId]/page.tsx
+ * - apps/user/src/app/editor/[projectId]/page.tsx
+ * - packages/ui (EditorWorkspace)
+ * - packages/editor-sdk (RoohaeEditor, ExportService, loadFonts)
+ */
+
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -34,16 +51,6 @@ import {
   useUploadReplacement,
 } from '@/lib/queries';
 
-/**
- * The user customization editor, in two modes sharing one lifecycle:
- *  - DRAFT (templateId, no project yet): edits are temporary; nothing exists
- *    in My Designs until the user clicks Save, which creates the project.
- *  - SAVED (projectId): the saved project loads; autosave keeps it updated.
- *
- * Autosave NEVER creates a project — it activates only after the first
- * manual Save. Fabric mounts only after template JSON + resolved assets +
- * fonts are all ready, so the canvas never renders blank.
- */
 export function ProjectEditor({
   initialProjectId,
   templateId,
@@ -305,6 +312,35 @@ export function ProjectEditor({
         onPreview={() => void openPreview()}
         topBarActions={
           <>
+            {/**
+             * BUTTON: Save
+             *
+             * LOCATION:
+             * User Editor TopBar Actions
+             *
+             * COMPONENT:
+             * ProjectEditor (Button)
+             *
+             * CLICK HANDLER:
+             * persist({ manual: true, withThumbnail: true })
+             *
+             * FLOW:
+             * Button
+             * → persist({ manual: true })
+             * → IF Draft mode (no projectId):
+             *     → POST /projects { templateId, title, document, thumbnail }
+             *     → projectsService.createFromTemplate()
+             *     → Clones template, verifies locked objects & creates Project record
+             *     → router.replace(`/editor/${newProject.id}`)
+             * → IF Saved mode (has projectId):
+             *     → PATCH /projects/:id { title, document, thumbnail }
+             *     → projectsService.update()
+             *     → Verifies locked elements remain byte-identical
+             *     → ProjectModel.updateOne()
+             *
+             * PURPOSE:
+             * Converts draft session into a saved project or triggers immediate manual save.
+             */ }
             <Button
               size="sm"
               variant={projectId ? 'outline' : 'primary'}
@@ -313,6 +349,30 @@ export function ProjectEditor({
             >
               <Save className="h-4 w-4" /> Save
             </Button>
+
+            {/**
+             * BUTTON: Download (Dropdown)
+             *
+             * LOCATION:
+             * User Editor TopBar Actions
+             *
+             * COMPONENT:
+             * ProjectEditor (DropdownMenuTrigger + DropdownMenuItems)
+             *
+             * CLICK HANDLER:
+             * download(format, scale)
+             *
+             * FLOW:
+             * Button
+             * → download(format)
+             * → persist({ manual: true }) [Ensures current canvas state is saved]
+             * → ExportService.export(document, { format, scale })
+             * → Offscreen canvas renders at native resolution or 300 DPI PDF
+             * → downloadBlob() / downloadDataUrl()
+             *
+             * PURPOSE:
+             * Generates full-resolution PNG, JPG, or print-ready PDF export for customer.
+             */ }
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="sm" variant={projectId ? 'primary' : 'outline'} loading={exporting}>

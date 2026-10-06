@@ -1,9 +1,25 @@
+/**
+ * FILE PURPOSE:
+ * Chalk/Pastel drawing engine simulating granular mineral textures.
+ *
+ * MAIN RESPONSIBILITY:
+ * Uses randomized pixel specks and particulate density algorithms to simulate chalk friction
+ * against rough blackboard or paper textures, rendering to an offscreen canvas and committing to FabricImage.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/tools/common/ToolManager.ts (manages tool lifecycle)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Draw > Chalk tool)
+ */
+
 import { Image as FabricImage, Point } from 'fabric';
 import { BaseDrawTool } from './BaseDrawTool';
 import { ToolContext } from '../common/BaseTool';
 import { distance } from './utils';
 
+// DRAW TOOL: CHALK
+// Simulates granular chalk texture using randomized particle scatter algorithms.
 export class ChalkEngine extends BaseDrawTool {
+
   private isDrawing = false;
   private offscreenCanvas!: HTMLCanvasElement;
   private ctx!: CanvasRenderingContext2D;

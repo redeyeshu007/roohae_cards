@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * 3D paper leaf rotation and dynamic specular shading component for the interactive book.
+ *
+ * MAIN RESPONSIBILITY:
+ * Uses Framer Motion transform physics to flip leaves along the spine axis, applying
+ * gradient specular highlights and shadows according to the leaf's active rotation angle.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/book/Book.tsx
+ * - apps/user/src/components/landing/hero/book/timing.ts
+ */
+
 "use client";
 
 import React, { useEffect } from "react";

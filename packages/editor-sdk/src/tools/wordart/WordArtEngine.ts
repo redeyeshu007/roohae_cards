@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Expressive typographic styling engine for decorative WordArt elements.
+ *
+ * MAIN RESPONSIBILITY:
+ * Generates stylized text effects including high-contrast outlines, drop shadows,
+ * pseudo-3D extrusion offsets, and path-deformed text (wave, arc, circle).
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls WordArtEngine.createWordArt)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Tools > WordArt gallery)
+ */
+
 import { Textbox, FabricText, FabricObject, Path } from 'fabric';
 
 export interface WordArtOptions {
@@ -10,7 +23,10 @@ export interface WordArtOptions {
   style?: 'arc' | 'wave' | 'circle' | 'outline' | 'shadow' | '3d';
 }
 
+// TOOL: WORDART ENGINE
+// Factory for stylized display typography and curved text effects.
 export class WordArtEngine {
+
   static createWordArt(options: WordArtOptions = {}): FabricObject {
     const text = options.text || 'Word Art';
     const style = options.style || 'outline';

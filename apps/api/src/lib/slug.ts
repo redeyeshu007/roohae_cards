@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * URL slug generation and collision avoidance utilities.
+ *
+ * MAIN RESPONSIBILITY:
+ * Transforms arbitrary category or template title strings into clean URL-safe slugs with random uniqueness suffixes.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/categories/categories.service.ts
+ * - apps/api/src/modules/templates/templates.service.ts
+ */
+
+// SLUG GENERATOR:
+// Normalizes strings to alphanumeric lowercase hyphen-separated slugs.
 export function slugify(input: string): string {
   return input
     .toLowerCase()

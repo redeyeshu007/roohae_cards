@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * 3D Book front cover component with embossed gold foil brand logo and leather texture.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders realistic book cover materials with subtle ambient lighting, spine gradient hinge shadows,
+ * and gold foil logo stamping.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/book/OpenBook.tsx
+ */
+
 import React from "react";
 import Image from "next/image";
 

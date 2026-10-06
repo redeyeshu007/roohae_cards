@@ -1,7 +1,23 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Compact color picker and hex code input field.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides a synchronized native color picker swatch preview alongside a direct hexadecimal text input,
+ * validating hex string syntax before updating canvas element fills/strokes.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/PropertiesPanel.tsx (text color, shape fill, stroke color)
+ * - packages/ui/src/editor/BackgroundPanel.tsx (page background color)
+ * - packages/ui/src/editor/ToolsPanel.tsx (border color picker)
+ */
+
 import { cn } from '../lib/cn';
 
+// COLOR PICKER FIELD:
+// Interactive color swatch and hex input component with automatic regex validation.
 export function ColorField({
   label,
   value,

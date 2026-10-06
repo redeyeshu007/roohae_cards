@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Mongoose schema and model definition for user card design projects.
+ *
+ * MAIN RESPONSIBILITY:
+ * Persists customized user design documents, template origin reference, dimensions,
+ * canvas JSON payload (DesignDocument), thumbnail image URL, and edit timestamps.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/projects/projects.service.ts (queries and updates user projects)
+ * - packages/shared/src/schemas/project.schema.ts (Zod validation schemas)
+ * - apps/user/src/components/ProjectEditor.tsx (User canvas editing UI)
+ */
+
 import { Schema, model, type HydratedDocument, type Model } from 'mongoose';
 import {
   MEASUREMENT_UNITS,

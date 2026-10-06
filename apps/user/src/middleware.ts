@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Next.js Edge Middleware for route request interception in the user application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Inspects protected route paths (/admin/:path*, /dashboard/:path*) and delegates
+ * authentication verification to client-side shells (AdminShell / UserShell).
+ *
+ * CONNECTED SYSTEMS:
+ * - Next.js Edge Runtime routing layer
+ * - apps/user/src/components/AdminShell.tsx
+ * - apps/user/src/components/UserShell.tsx
+ */
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 

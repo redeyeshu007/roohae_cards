@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * JWT authentication and role-based access control (RBAC) middleware.
+ *
+ * MAIN RESPONSIBILITY:
+ * Extracts Bearer tokens from incoming Authorization headers, verifies validity with verifyAccessToken,
+ * attaches auth user payload to Express req, and provides requireRole / requireAdmin gates.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/* (*.routes.ts gates admin and protected user endpoints with requireAuth/requireAdmin)
+ * - apps/api/src/lib/tokens.ts (token verification routines)
+ */
+
 import type { NextFunction, Request, Response } from 'express';
 import type { Role } from '@roohae/shared';
 import { ApiError } from '../lib/errors';

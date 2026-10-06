@@ -1,5 +1,20 @@
+/**
+ * FILE PURPOSE:
+ * Asset Mongoose model and schema definition for digital media files.
+ *
+ * MAIN RESPONSIBILITY:
+ * Defines MongoDB schema for digital assets with strict scope segregation
+ * ('library' for admin stock, 'user' for private uploads, 'system' for thumbnails),
+ * preserving untouched original file storage keys, dimensions, and derived variants.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/assets/assets.service.ts (queries and writes AssetModel)
+ * - apps/api/src/storage/index.ts (stores the underlying binary file)
+ */
+
 import { Schema, model, type HydratedDocument, type Model } from 'mongoose';
 import { ASSET_KINDS, type AssetKind } from '@roohae/shared';
+
 
 export interface AssetVariantDoc {
   name: string;

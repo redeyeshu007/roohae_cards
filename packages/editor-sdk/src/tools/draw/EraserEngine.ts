@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Non-destructive vector eraser and raster canvas clearing engine.
+ *
+ * MAIN RESPONSIBILITY:
+ * Erases freehand drawings by splitting vector paths at the eraser radius using dense resampling,
+ * and clears rasterized paint strokes directly from canvas bitmasks.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/tools/common/ToolManager.ts (manages eraser lifecycle)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Draw > Eraser tool)
+ */
+
 import { Path, Point, Image as FabricImage } from 'fabric';
 import { BaseDrawTool } from './BaseDrawTool';
 import { ToolContext } from '../common/BaseTool';
@@ -8,6 +21,7 @@ import { distance, smoothPathFromPoints } from './utils';
  * This guarantees dense point coverage for smooth partial vector path erasing.
  */
 function resamplePoints(points: Point[], maxDist = 4): Point[] {
+
   if (points.length < 2) return points;
   const dense: Point[] = [points[0]!];
   for (let i = 0; i < points.length - 1; i++) {

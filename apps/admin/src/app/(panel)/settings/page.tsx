@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Global administrative system settings and environment configuration display.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides visibility into active API base endpoints, backend storage driver mode
+ * (local disk vs. Cloudflare R2), and platform asset retention policies.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/api.ts (API_BASE_URL)
+ * - apps/admin/src/components/AdminShell.tsx (PageHeader)
+ */
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@roohae/ui';
@@ -9,6 +22,7 @@ export default function SettingsPage() {
     <>
       <PageHeader title="Settings" description="Platform configuration overview." />
       <div className="grid max-w-3xl grid-cols-1 gap-6">
+        {/* Environment configuration card */}
         <Card>
           <CardHeader>
             <CardTitle>Environment</CardTitle>
@@ -26,6 +40,7 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+        {/* Asset preservation policy card */}
         <Card>
           <CardHeader>
             <CardTitle>Asset policy</CardTitle>

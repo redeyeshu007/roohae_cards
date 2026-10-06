@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * 3D rotating card reveal animation component for the storytelling sequence.
+ *
+ * MAIN RESPONSIBILITY:
+ * Dynamically constructs luxury invitations, business cards, birthday passes, and certificates
+ * with 3D rotation, metallic foil corners, particle sparkles, and paper grain shaders.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/story/ConversationStory.tsx
+ */
+
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";

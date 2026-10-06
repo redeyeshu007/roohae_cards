@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Creative Control Center dashboard page for admin users inside the user application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Fetches platform stats (users, templates, categories, published templates, assets),
+ * provides quick navigation action cards, and displays activity metrics.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/admin-queries.ts (useDashboardStats)
+ * - apps/user/src/components/AdminShell.tsx (PageHeader)
+ * - apps/api/src/modules/dashboard/dashboard.routes.ts
+ */
+
 'use client';
 
 import Link from 'next/link';
@@ -32,6 +46,8 @@ const QUICK_ACTIONS = [
 ];
 
 export default function DashboardPage() {
+  // API QUERY:
+  // Fetches aggregated dashboard metrics via GET /api/v1/dashboard/stats
   const { data, isLoading } = useDashboardStats();
 
   return (

@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * Global stylesheet for the Roohae Admin Next.js web application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Loads Inter typography from Google Fonts, integrates Tailwind CSS directives,
+ * configures base body layout styles, and defines custom styled webkit scrollbars.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/app/layout.tsx (imports this stylesheet)
+ */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @import "tailwindcss";

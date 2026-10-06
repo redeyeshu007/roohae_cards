@@ -1,6 +1,21 @@
+/**
+ * FILE PURPOSE:
+ * Audit activity logging service and Mongoose model.
+ *
+ * MAIN RESPONSIBILITY:
+ * Records non-blocking audit trail events (user login, template creation, publishing, deletions)
+ * to MongoDB and retrieves recent activity feeds for the admin dashboard.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/dashboard/dashboard.routes.ts (fetches recent activity)
+ * - apps/api/src/modules/* (calls activityService.log() after critical mutations)
+ * - MongoDB: ActivityLog collection
+ */
+
 import { Schema, model, type Model } from 'mongoose';
 import type { Role } from '@roohae/shared';
 import { logger } from '../../lib/logger';
+
 
 interface ActivityLogDoc {
   actorId: Schema.Types.ObjectId;
@@ -52,6 +67,9 @@ export class ActivityService {
     metadata?: Record<string, unknown>,
   ): Promise<void> {
     try {
+      // DATABASE CONNECTION:
+      // Records audit entry in MongoDB ActivityLog collection.
+      // Flow: Service action → ActivityService.log() → ActivityLogModel.create() → MongoDB
       await ActivityLogModel.create({ actorId, actorRole, action, entityType, entityId, metadata });
     } catch (err) {
       logger.warn({ err, action }, 'Failed to write activity log');

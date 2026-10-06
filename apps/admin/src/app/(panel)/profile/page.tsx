@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Admin user profile settings and credentials management page.
+ *
+ * MAIN RESPONSIBILITY:
+ * Allows administrator to update their display name and change password credentials,
+ * syncing updated profile information back into the Zustand useAuthStore.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/api.ts (api client and useAuthStore)
+ * - apps/api/src/modules/auth/auth.routes.ts (PATCH /auth/profile, POST /auth/change-password)
+ * - apps/admin/src/components/AdminShell.tsx (PageHeader)
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -8,6 +22,8 @@ import { PageHeader } from '@/components/AdminShell';
 import { api, useAuthStore } from '@/lib/api';
 
 export default function ProfilePage() {
+  // AUTH STORE:
+  // Reads current user and update function from local auth store
   const { user, setUser } = useAuthStore();
   const [name, setName] = useState(user?.name ?? '');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -15,6 +31,9 @@ export default function ProfilePage() {
   const [savingName, setSavingName] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
 
+  // SAVE NAME HANDLER:
+  // SUBMIT FLOW:
+  // Form submission -> PATCH /auth/profile -> updates useAuthStore -> displays toast
   async function saveName(e: React.FormEvent) {
     e.preventDefault();
     setSavingName(true);
@@ -29,6 +48,9 @@ export default function ProfilePage() {
     }
   }
 
+  // CHANGE PASSWORD HANDLER:
+  // SUBMIT FLOW:
+  // Form submission -> POST /auth/change-password -> invalidates other sessions -> resets inputs
   async function savePassword(e: React.FormEvent) {
     e.preventDefault();
     setSavingPassword(true);
@@ -62,6 +84,8 @@ export default function ProfilePage() {
                 <Label>Email</Label>
                 <Input value={user?.email ?? ''} disabled />
               </div>
+              {/* BUTTON:
+                  Save name changes */}
               <Button type="submit" loading={savingName}>
                 Save changes
               </Button>
@@ -96,6 +120,8 @@ export default function ProfilePage() {
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
               </div>
+              {/* BUTTON:
+                  Submit password change */}
               <Button type="submit" variant="secondary" loading={savingPassword}>
                 Update password
               </Button>

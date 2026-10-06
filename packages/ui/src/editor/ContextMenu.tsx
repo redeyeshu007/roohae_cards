@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Floating canvas right-click contextual action menu.
+ *
+ * MAIN RESPONSIBILITY:
+ * Mounts at pointer coordinates upon right-click canvas events to provide quick operations:
+ * Copy/Paste, Duplicate, Delete, Layer Ordering (Bring to Front, Send to Back),
+ * Alignment, Flipping (horizontal/vertical), and Lock/Unlock toggling.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/EditorWorkspace.tsx (listens to contextmenu event and mounts this component)
+ * - packages/editor-sdk/src/RoohaeEditor.ts (executes manipulation actions on active canvas selection)
+ */
+
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -37,6 +51,9 @@ export interface ContextMenuProps {
   editor: RoohaeEditor | null;
   selection: SelectionState;
 }
+
+// CONTEXT MENU COMPONENT:
+// Rendered on canvas right-click for immediate layer manipulation actions.
 
 export function ContextMenu({ x, y, isOpen, onClose, editor, selection }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);

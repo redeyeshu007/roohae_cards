@@ -1,3 +1,25 @@
+/**
+ * FILE PURPOSE:
+ * Roohae Editor Facade (RoohaeEditor) wrapping the Fabric.js interactive canvas.
+ *
+ * MAIN RESPONSIBILITY:
+ * Core SDK boundary wrapping the Fabric.js interactive canvas.
+ * Encapsulates all object manipulation, history tracking, viewport scaling,
+ * layer management, background matting, drawing engines, and serialization.
+ * Ensures React components never manipulate raw Fabric canvas objects directly.
+ *
+ * CRITICAL ARCHITECTURAL RULES:
+ * 1. Coordinates: Always work in native design document coordinates, not viewport pixel space.
+ * 2. Locking: In User mode, locked objects (roohEditable: false) must remain non-interactive.
+ * 3. Asset Resolution: Assets are referenced by assetId and resolved at runtime. Do not hardcode URLs.
+ * 4. Image Transformations: In removeBackgroundFromSelected(), always preserve origin, scale, crop, and rotation.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/EditorWorkspace.tsx
+ * - apps/admin/src/app/editor/[templateId]/page.tsx
+ * - apps/user/src/components/ProjectEditor.tsx
+ */
+
 import {
   ActiveSelection,
   Canvas,

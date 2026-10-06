@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Landing page hero viewport with dynamic masthead typography and 3D interactive book.
+ *
+ * MAIN RESPONSIBILITY:
+ * Measures responsive typographic scale for 'ROOHAE CARDS', hosts the 3D interactive Book component,
+ * and manages scroll-driven exit opacity animations.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/HeroScene.tsx
+ * - apps/user/src/components/landing/hero/book/Book.tsx
+ * - apps/user/src/app/page.tsx
+ */
+
 "use client";
 
 import { useRef, useEffect } from "react";

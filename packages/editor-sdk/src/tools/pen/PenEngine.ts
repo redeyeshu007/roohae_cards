@@ -1,7 +1,23 @@
+/**
+ * FILE PURPOSE:
+ * Node-based vector pen tool for precision polygonal path construction.
+ *
+ * MAIN RESPONSIBILITY:
+ * Allows authors to plot anchor points on canvas clicks ('M' and 'L' SVG commands),
+ * provides interactive line segment previewing, and finalizes editable vector paths on double-click.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/tools/common/ToolManager.ts (manages pen tool)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Tools > Pen tool)
+ */
+
 import { Path, Point } from 'fabric';
 import { BaseTool, ToolContext } from '../common/BaseTool';
 
+// TOOL: VECTOR PEN
+// Point-by-point Bézier / polygonal vector path creator.
 export class PenEngine extends BaseTool {
+
   private isDrawing = false;
   private pathData: any[] = [];
   private activePath: Path | null = null;

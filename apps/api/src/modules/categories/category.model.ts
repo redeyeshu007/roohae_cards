@@ -1,5 +1,19 @@
+/**
+ * FILE PURPOSE:
+ * Category Mongoose model and MongoDB schema definition for design card sizes.
+ *
+ * MAIN RESPONSIBILITY:
+ * Defines dimensional specifications (width, height, measurement unit, orientation)
+ * and URL slug indexing for design product categories (e.g. Business Cards, Invitations).
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/categories/categories.service.ts (queries and writes CategoryModel)
+ * - apps/admin & apps/user (uses categories to size new canvases)
+ */
+
 import { Schema, model, type HydratedDocument, type Model } from 'mongoose';
 import { MEASUREMENT_UNITS, ORIENTATIONS, type MeasurementUnit, type Orientation } from '@roohae/shared';
+
 
 export interface CategoryDoc {
   name: string;

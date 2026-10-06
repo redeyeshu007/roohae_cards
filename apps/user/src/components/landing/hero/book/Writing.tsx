@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Typography rendering sheet component for book page spreads (verso left and recto right).
+ *
+ * MAIN RESPONSIBILITY:
+ * Typesets atelier dates, title display font, subtitles, hand-written notes, and signatures
+ * sized in container query units (cqi) across the facing pages of the opened book.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/book/Page.tsx
+ * - apps/user/src/components/landing/hero/book/pages.ts
+ */
+
 "use client";
 
 import Image from "next/image";

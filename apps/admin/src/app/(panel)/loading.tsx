@@ -1,3 +1,14 @@
+/**
+ * FILE PURPOSE:
+ * Suspense loading fallback indicator for admin panel sub-routes.
+ *
+ * MAIN RESPONSIBILITY:
+ * Displays a centered spinner while server-rendered or lazy-loaded panel pages hydrate.
+ *
+ * CONNECTED SYSTEMS:
+ * - Next.js App Router streaming boundary for (panel) route group
+ */
+
 import { Loader2 } from 'lucide-react';
 
 export default function Loading() {

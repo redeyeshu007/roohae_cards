@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Central asset library manager for admin inside user app.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides file drop zone and file input for uploading design assets (PNG, JPG, SVG, etc.),
+ * supports category tabs (All, Images) and search, and handles deletion.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/admin-queries.ts (useAssets, useUploadAssets, useDeleteAsset)
+ * - apps/api/src/modules/assets/assets.routes.ts
+ */
+
 'use client';
 
 import { useRef, useState } from 'react';
@@ -44,6 +57,8 @@ export default function UploadsPage() {
   const [search, setSearch] = useState('');
   const [dragging, setDragging] = useState(false);
 
+  // API QUERIES & MUTATIONS:
+  // Fetches asset catalog and handles file upload/deletion
   const { data, isLoading } = useAssets({ kind: PANEL_KIND[panel], search });
   const uploadMutation = useUploadAssets();
   const deleteMutation = useDeleteAsset();
@@ -51,7 +66,6 @@ export default function UploadsPage() {
   const visibleAssets = (data?.items ?? []).filter((asset) => assetMatchesPanel(asset, panel));
 
   function handleFiles(files: FileList | File[]) {
-    // Snapshot into a real array — a live FileList empties when the input is reset.
     const picked = Array.from(files);
     if (!picked.length) return;
     uploadMutation.mutate({ files: picked });
@@ -75,6 +89,8 @@ export default function UploadsPage() {
                 e.target.value = '';
               }}
             />
+            {/* BUTTON:
+                Trigger file upload picker */}
             <Button
               loading={uploadMutation.isPending}
               onClick={() => fileInputRef.current?.click()}
@@ -85,7 +101,8 @@ export default function UploadsPage() {
         }
       />
 
-      {/* Drop zone */}
+      {/* DROP ZONE:
+          Drag-and-drop file upload target */}
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -107,6 +124,8 @@ export default function UploadsPage() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* TABS:
+            Switch between All and Images tabs */}
         <Tabs value={panel} onValueChange={(v) => setPanel(v as AssetPanelType)}>
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>

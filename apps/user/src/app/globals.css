@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * Global CSS styles and design system variables for the Roohae user application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Integrates Tailwind v4 directives, animations, OKLCH and CSS color tokens,
+ * paper textures, and custom responsive typography themes.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/app/layout.tsx
+ */
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";

@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Express route definitions for asset management, uploads, and runtime resolution.
+ *
+ * MAIN RESPONSIBILITY:
+ * Exposes endpoints for paginating library assets (admin), querying user uploads (/mine),
+ * resolving referenced asset IDs to loadable URLs (/resolve), and handling multipart uploads.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/routes.ts (mounts assetsRoutes at /api/v1/assets)
+ * - apps/api/src/modules/assets/assets.service.ts (business logic)
+ * - apps/admin & apps/user (Uploads panel and runtime asset resolution)
+ */
+
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
@@ -9,6 +23,7 @@ import { ApiError } from '../../lib/errors';
 import { assetsService } from './assets.service';
 
 export const assetsRoutes = Router();
+
 
 /**
  * The global Asset Library (Uploads panel). ADMIN ONLY — end users never

@@ -1,3 +1,14 @@
+/**
+ * FILE PURPOSE:
+ * Audio mute/unmute control button for the landing experience video player.
+ *
+ * MAIN RESPONSIBILITY:
+ * Toggles audio volume state with animated Volume2 / VolumeX icon transitions.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/Experience/VideoPlayer.tsx
+ */
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, VolumeX } from "lucide-react";
 

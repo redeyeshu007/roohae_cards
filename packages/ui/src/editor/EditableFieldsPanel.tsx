@@ -1,11 +1,27 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Customer quick-edit panel for all editable text fields across the design.
+ *
+ * MAIN RESPONSIBILITY:
+ * Filters and lists all text elements flagged as roohEditable: true by the template author,
+ * providing direct inline text inputs and "Select" focus buttons for non-designers.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/LeftSidebar.tsx (renders EditableFieldsPanel in user mode)
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls editor.selectObject and editor.updateObjectText)
+ * - apps/user/src/components/ProjectEditor.tsx (enables customer text customization)
+ */
+
 import { Type } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { EditableField, RoohaeEditor } from '@roohae/editor-sdk';
 import { cn } from '../lib/cn';
 import { EmptyState, Input, Label } from '../components/basics';
 
+// EDITABLE FIELDS PANEL:
+// Simplifies card personalization by exposing form-like inputs for all customizable card text.
 export function EditableFieldsPanel({
   editor,
   fields,

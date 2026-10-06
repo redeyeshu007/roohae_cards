@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Sticky Note generator engine with custom rounded card backgrounds.
+ *
+ * MAIN RESPONSIBILITY:
+ * Creates editable note card Textbox objects with customized rounded background canvas rendering,
+ * pastel color schemes, and standardized handle aesthetics.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls StickyEngine.createStickyNote)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Tools > Sticky Notes tool)
+ */
+
 import { Group, Rect, Textbox, FabricObject } from 'fabric';
 
 export interface StickyOptions {
@@ -10,7 +23,10 @@ export interface StickyOptions {
   fontSize?: number;
 }
 
+// TOOL: STICKY NOTE ENGINE
+// Instantiates memo note card elements with rounded background rendering.
 export class StickyEngine {
+
   static createStickyNote(options: StickyOptions = {}): Textbox {
     const width = options.width || 200;
     

@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * Timing constants and duration configuration for the hero book animation sequence.
+ *
+ * MAIN RESPONSIBILITY:
+ * Synchronizes cover turn physics, page turn delays, reading dwells, and closing riffle pacing.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/landing/hero/book/Book.tsx
+ * - apps/user/src/components/landing/hero/book/PageTurn.tsx
+ */
+
 /** -----------------------------------
  * Book timing
  *

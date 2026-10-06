@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Administrative React Query hooks bundled within the user app admin routes.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides admin dashboard stats, categories CRUD, templates CRUD, asset management,
+ * font face uploads, and user administration queries for /admin route views hosted inside the user app.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/api.ts (Axios API client)
+ * - apps/user/src/app/admin/* (Embedded admin views inside user app)
+ */
+
 'use client';
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';

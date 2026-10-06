@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Left sidebar tool selector and sub-tool authoring interface for advanced creative workflows.
+ *
+ * MAIN RESPONSIBILITY:
+ * Houses tool suites for Borders & Lines, Freehand Draw (8 brush styles + eraser),
+ * Sticky Notes, WordArt typography presets, and Canva-style cursive Signatures.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/LeftSidebar.tsx (hosts ToolsPanel)
+ * - packages/editor-sdk (delegates tool activations, stamp insertions, and drawing modes)
+ */
+
+
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { ArrowLeft, Square, PenTool, Sticker, Type, Pencil, Highlighter, Eraser, Paintbrush, Sparkles, X, ChevronDown, Upload, Scissors } from 'lucide-react';
 import { cn } from '../lib/cn';
@@ -288,6 +302,28 @@ export function ToolsPanel({ editor }: { editor: RoohaeEditor | null }) {
         <h3 className="text-base font-bold text-[#1F1F1F]">Tools</h3>
         <div className="grid grid-cols-2 gap-2.5">
           {TOOLS.map(tool => (
+            /**
+             * BUTTON: Tool Selector (Borders, Draw, Sticky Notes, WordArt, Signature)
+             *
+             * LOCATION:
+             * ToolsPanel Root Grid
+             *
+             * COMPONENT:
+             * ToolsPanel (Button)
+             *
+             * CLICK HANDLER:
+             * onClick [tool.id branch]
+             *
+             * FLOW:
+             * - 'draw'      → setActiveTool('draw') → editor.toolManager.activate('draw-pencil')
+             * - 'signature' → setActiveTool('signature')
+             * - 'sticky'    → editor.addStickyNote() → canvas.add(StickyGroup)
+             * - 'wordart'   → editor.addWordArt() → canvas.add(WordArtTextbox)
+             * - 'borders'   → setActiveTool('borders-lines')
+             *
+             * PURPOSE:
+             * Switches active tool mode or creates an instant design asset on canvas.
+             */
             <button
               key={tool.id}
               onClick={() => {
@@ -610,6 +646,29 @@ export function ToolsPanel({ editor }: { editor: RoohaeEditor | null }) {
           {BRUSHES.map(brush => {
             const isActive = activeBrush === brush.id;
             return (
+              /**
+               * BUTTON: Brush Selector (Pencil, Pen, Marker, Highlighter, Brush, Chalk, Spray, Eraser)
+               *
+               * LOCATION:
+               * ToolsPanel Draw Subpanel
+               *
+               * COMPONENT:
+               * ToolsPanel (Button)
+               *
+               * CLICK HANDLER:
+               * handleBrushClick(brush.id)
+               *
+               * FLOW:
+               * Button
+               * → handleBrushClick(brushId)
+               * → editor.toolManager.activate(`draw-${brushId}`, { color, thickness, opacity })
+               * → BaseDrawTool.activate()
+               * → Disables canvas object selection & binds pointer event listeners
+               * → Active brush engine takes over canvas drawing lifecycle
+               *
+               * PURPOSE:
+               * Activates specific freehand drawing engine or vector eraser on canvas.
+               */
               <button
                 key={brush.id}
                 onClick={() => handleBrushClick(brush.id)}

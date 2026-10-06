@@ -1,11 +1,18 @@
 /**
- * DANGER: wipes the ENTIRE database, then recreates only the admin account
- * from SEED_ADMIN_* env. Also empties the local uploads directory when the
- * local storage driver is active. Refuses to run in production.
+ * FILE PURPOSE:
+ * Database teardown and administrative reset maintenance script.
  *
- *   npm run reset --workspace @roohae/api
+ * MAIN RESPONSIBILITY:
+ * Safely wipes all MongoDB collections in non-production environments, cleans local uploads,
+ * and re-seeds a fresh administrator account based on SEED_ADMIN_* environment variables.
+ *
+ * CONNECTED SYSTEMS:
+ * - MongoDB (drops all collections)
+ * - apps/api/src/modules/users/user.model.ts (re-creates root admin)
  */
+
 import { promises as fs } from 'node:fs';
+
 import path from 'node:path';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';

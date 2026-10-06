@@ -1,7 +1,25 @@
+/**
+ * FILE PURPOSE:
+ * Type declarations and event contracts for the Roohae Editor SDK.
+ *
+ * MAIN RESPONSIBILITY:
+ * Defines editor mode types (admin/user), selection snapshots, layer entries,
+ * placeholder schemas, event signatures, and export configuration options.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/RoohaeEditor.ts (implements these options and fires these events)
+ * - packages/ui/src/editor/* (consumes selection snapshots and editor options)
+ * - apps/admin & apps/user (instantiates the editor with these options)
+ */
+
 import type { DesignDocument, DesignPage } from '@roohae/shared';
 
+// EDITOR MODES:
+// 'admin' permits full editing of all layers; 'user' restricts editing to admin-flagged editable elements.
 export type EditorMode = 'admin' | 'user';
 
+// SHAPE KINDS:
+// Geometric shape primitives supported by ShapeFactory.
 export type ShapeKind =
   | 'rectangle'
   | 'rounded-rectangle'
@@ -14,15 +32,20 @@ export type ShapeKind =
   | 'arrow'
   | 'line';
 
+// TEXT PRESETS:
+// Typography hierarchy presets for quickly inserting pre-sized text blocks.
 export type TextPreset = 'heading' | 'subheading' | 'body';
 
 /** Editor-agnostic snapshot of the selected object(s), consumed by the properties panel. */
+// SELECTION STATE:
+// Normalized snapshot emitted on selection:change to sync the Properties panel without leaking Fabric objects.
 export interface SelectionState {
   ids: string[];
   /** Present when exactly one object is selected. */
   object?: ObjectSnapshot;
   count: number;
 }
+
 
 export interface ObjectSnapshot {
   id: string;

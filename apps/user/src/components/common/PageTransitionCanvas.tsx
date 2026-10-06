@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Fullscreen WebGL Three.js canvas rendering liquid ink-dissolve page transition shaders.
+ *
+ * MAIN RESPONSIBILITY:
+ * Mounts a full-screen GPU shader quad executing custom GLSL ink drops, noise warps,
+ * and circular wipe reveals that synchronize with Next.js router.push navigations.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/store/transitionStore.ts
+ * - apps/user/src/components/common/TransitionLink.tsx
+ */
+
 "use client";
 
 import { useEffect, useRef } from "react";

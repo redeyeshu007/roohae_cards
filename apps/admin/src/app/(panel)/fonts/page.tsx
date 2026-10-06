@@ -1,3 +1,18 @@
+/**
+ * FILE PURPOSE:
+ * Custom typography and font asset management page for Roohae Admin.
+ *
+ * MAIN RESPONSIBILITY:
+ * Displays uploaded brand font families and styles, enables uploading multi-weight
+ * OTF/TTF/WOFF/WOFF2 font bundles via multipart form data, dynamically registers
+ * them in document fonts via loadFonts(), and provides deletion capability.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/queries.ts (useFonts, useUploadFont, useDeleteFont)
+ * - packages/editor-sdk/src/fonts.ts (loadFonts)
+ * - apps/api/src/modules/fonts/fonts.routes.ts
+ */
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -17,6 +32,8 @@ import { PageHeader } from '@/components/AdminShell';
 import { useDeleteFont, useFonts, useUploadFont } from '@/lib/queries';
 
 export default function FontsPage() {
+  // API QUERIES & MUTATIONS:
+  // Fetches fonts list and handles font upload/deletion
   const { data: fonts, isLoading } = useFonts();
   const uploadMutation = useUploadFont();
   const deleteMutation = useDeleteFont();
@@ -26,11 +43,15 @@ export default function FontsPage() {
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Register uploaded families so previews render in their own face.
+  // FONT LOADER EFFECT:
+  // Registers uploaded font families into browser FontFaceSet for live preview
   useEffect(() => {
     if (fonts?.length) void loadFonts(fonts);
   }, [fonts]);
 
+  // SUBMIT HANDLER:
+  // SUBMIT FLOW:
+  // Form submission -> uploadMutation.mutateAsync -> POST /api/v1/fonts (FormData) -> resets state
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!files.length) return;
@@ -46,6 +67,10 @@ export default function FontsPage() {
         title="Fonts"
         description="Brand typefaces available in the editor. Supports OTF, TTF, WOFF and WOFF2."
         actions={
+          // BUTTON:
+          // Upload font
+          // CALLS:
+          // setOpen(true)
           <Button onClick={() => setOpen(true)}>
             <Plus className="h-4 w-4" /> Upload font
           </Button>
@@ -64,6 +89,8 @@ export default function FontsPage() {
           title="No fonts uploaded"
           description="Upload font families to make them available across all templates."
           action={
+            // BUTTON:
+            // Empty state upload trigger
             <Button onClick={() => setOpen(true)}>
               <Plus className="h-4 w-4" /> Upload font
             </Button>
@@ -81,6 +108,8 @@ export default function FontsPage() {
                     {font.faces.map((f) => f.weight).join(', ')}
                   </p>
                 </div>
+                {/* BUTTON:
+                    Delete font family -> DELETE /api/v1/fonts/:id */}
                 <Button
                   variant="ghost"
                   size="icon-sm"
@@ -101,6 +130,7 @@ export default function FontsPage() {
         </div>
       )}
 
+      {/* UPLOAD FONT DIALOG */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           title="Upload font family"
@@ -127,6 +157,8 @@ export default function FontsPage() {
                 className="hidden"
                 onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
               />
+              {/* BUTTON:
+                  File picker trigger area */}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
@@ -138,9 +170,13 @@ export default function FontsPage() {
               </button>
             </div>
             <div className="flex justify-end gap-2 pt-2">
+              {/* BUTTON:
+                  Cancel font dialog */}
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
+              {/* BUTTON:
+                  Submit font upload */}
               <Button type="submit" disabled={!files.length} loading={uploadMutation.isPending}>
                 Upload
               </Button>

@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Intermediate base class managing canvas interaction modes for freehand drawing tools.
+ *
+ * MAIN RESPONSIBILITY:
+ * Toggles canvas into drawing mode by disabling standard object selection/hover targets,
+ * switching cursor to crosshair, attaching low-level mouse pointer listeners, and restoring state upon deactivation.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/tools/draw/BaseDrawEngine.ts (inherits from BaseDrawTool)
+ * - packages/editor-sdk/src/tools/draw/EraserEngine.ts (inherits from BaseDrawTool)
+ */
+
 import { BaseBrush } from 'fabric';
 import { BaseTool, ToolContext } from '../common/BaseTool';
 
@@ -13,7 +26,10 @@ export interface DrawConfig {
   texture?: string;
 }
 
+// BASE DRAW TOOL:
+// Handles canvas pointer binding and isolates drawing strokes from selection mechanics.
 export abstract class BaseDrawTool extends BaseTool {
+
   public config: DrawConfig = {
     color: '#000000',
     thickness: 5,

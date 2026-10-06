@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Collapsible left navigation sidebar and tool drawer for the Roohae editor workspace.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides the vertical icon rail for switching tabs (Text, Elements/Shapes, Uploads, Placeholders,
+ * Fields, Canvas Background, Tools, Layers) and renders the active drawer subpanel.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/EditorWorkspace.tsx (renders LeftSidebar)
+ * - packages/ui/src/editor/ToolsPanel.tsx (rendered when 'tools' tab is active)
+ * - packages/editor-sdk/src/RoohaeEditor.ts (dispatches object creation for text, shapes, and media)
+ */
+
 import {
   ArrowRight,
   Circle,

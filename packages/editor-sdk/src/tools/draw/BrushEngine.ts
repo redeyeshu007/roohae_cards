@@ -1,9 +1,25 @@
+/**
+ * FILE PURPOSE:
+ * Artistic watercolor/acrylic paint brush engine with soft radial stamps.
+ *
+ * MAIN RESPONSIBILITY:
+ * Emulates natural bristle paint blending by stamping soft radial gradients onto an offscreen canvas
+ * at 60 FPS, then baking the bounding box into a persistent FabricImage object.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/tools/common/ToolManager.ts (manages brush activation)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Draw > Brush tool)
+ */
+
 import { Image as FabricImage, Point } from 'fabric';
 import { BaseDrawTool } from './BaseDrawTool';
 import { ToolContext } from '../common/BaseTool';
 import { distance } from './utils';
 
+// DRAW TOOL: BRUSH
+// Simulates continuous painterly stroke stamping with pressure-sensitive radii.
 export class BrushEngine extends BaseDrawTool {
+
   private isDrawing = false;
   private offscreenCanvas!: HTMLCanvasElement;
   private ctx!: CanvasRenderingContext2D;

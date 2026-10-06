@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Express route declarations for template browsing, retrieval, creation, updating, and publishing.
+ *
+ * MAIN RESPONSIBILITY:
+ * Exposes GET / (filtered for users to published templates; open to all statuses for admins),
+ * GET /:id, and admin-protected POST /, PATCH /:id, PATCH /:id/status, and DELETE /:id.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/routes.ts (mounts templatesRoutes at /api/v1/templates)
+ * - apps/api/src/modules/templates/templates.service.ts (business logic and asset extractors)
+ * - apps/admin & apps/user template galleries and editor loaders
+ */
+
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import {

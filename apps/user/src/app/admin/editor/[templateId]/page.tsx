@@ -1,3 +1,18 @@
+/**
+ * FILE PURPOSE:
+ * Full-screen template canvas editor workspace for admin inside user app.
+ *
+ * MAIN RESPONSIBILITY:
+ * Loads template document, registers fonts, mounts EditorWorkspace with Fabric.js engine,
+ * manages autosave timers and manual save, handles export/download to PNG/PDF, and manages publishing.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/RoohaeEditor.ts (RoohaeEditor instance)
+ * - packages/editor-sdk/src/ExportService.ts (ExportService)
+ * - apps/user/src/lib/admin-queries.ts (useTemplate, useFonts, useInfiniteAssets, useResolveAssets, useSaveTemplate, useSetTemplateStatus, useUploadAssets)
+ * - packages/ui/src/editor/EditorWorkspace.tsx
+ */
+
 'use client';
 
 import { use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -262,6 +277,8 @@ export default function TemplateEditorPage({
           </Badge>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
+              {/* BUTTON:
+                  Export / Download dropdown menu */}
               <Button size="sm" variant="outline" loading={exporting}>
                 <Download className="h-4 w-4" /> Download
               </Button>
@@ -288,6 +305,8 @@ export default function TemplateEditorPage({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          {/* BUTTON:
+              Publish or unpublish template */}
           <Button size="sm" loading={statusMutation.isPending} onClick={() => void publish()}>
             <Globe2 className="h-4 w-4" />
             {template.status === 'published' ? 'Unpublish' : 'Publish'}
@@ -295,6 +314,7 @@ export default function TemplateEditorPage({
         </>
       }
     />
+    {/* PREVIEW MODAL */}
     <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
       <DialogContent 
         title="Preview" 
@@ -339,6 +359,8 @@ export default function TemplateEditorPage({
           
           {previewUrls.length > 1 && (
             <div className="mt-6 flex items-center gap-3">
+              {/* BUTTON:
+                  Flip front and back preview cards */}
               <Button 
                 variant="outline" 
                 onClick={() => setPreviewFlipped(f => !f)}

@@ -1,6 +1,20 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Context-sensitive properties inspector and formatting sidebar.
+ *
+ * MAIN RESPONSIBILITY:
+ * Dynamically renders formatting controls based on selected object type: typography, colors,
+ * border styling, AI background removal, alignment, layer ordering, and placeholder rules.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/EditorWorkspace.tsx (mounts PropertiesPanel in right sidebar)
+ * - packages/editor-sdk (RoohaeEditor selection updates and object mutations)
+ */
+
 import {
+
   AlignCenter,
   AlignLeft,
   AlignRight,
@@ -93,9 +107,30 @@ function ToggleButton({
 }
 
 /**
- * Context-sensitive properties panel — content adapts to the selected
- * object type, exactly like Canva's right rail.
+ * Roohae Editor PropertiesPanel Component
+ *
+ * PURPOSE:
+ * Context-sensitive properties inspector and formatting sidebar.
+ * Adapts in real-time to the active selection (Text, Image, Shape, Draw, Border, Sticky Note).
+ * Provides typography formatting, color fills, border adjustments, layer ordering,
+ * alignment, object locking, and background matting removal.
+ *
+ * USED BY:
+ * - packages/ui/src/editor/EditorWorkspace.tsx
+ *
+ * CALLS:
+ * - editor.updateSelection()
+ * - editor.removeBackgroundFromSelected()
+ * - editor.duplicateSelection()
+ * - editor.deleteSelection()
+ * - editor.bringForward() / editor.sendBackward()
+ *
+ * DEPENDENCIES:
+ * - @roohae/editor-sdk (RoohaeEditor)
+ * - @roohae/shared (Font types)
+ * - Radix UI primitives & Lucide icons
  */
+
 export function PropertiesPanel({
   editor,
   selection,
@@ -185,11 +220,58 @@ export function PropertiesPanel({
           {selection.count > 1 ? `${selection.count} elements` : obj?.name}
         </p>
         <div className="flex items-center gap-1">
+          {/**
+           * BUTTON: Duplicate
+           *
+           * LOCATION:
+           * PropertiesPanel Header Actions
+           *
+           * COMPONENT:
+           * PropertiesPanel (Button)
+           *
+           * CLICK HANDLER:
+           * editor.duplicateSelection()
+           *
+           * FLOW:
+           * Button
+           * → editor.duplicateSelection()
+           * → RoohaeEditor.cloneObject()
+           * → newObjectId() + offset coordinates (+10, +10)
+           * → canvas.add(cloned) & canvas.setActiveObject(cloned)
+           * → pushHistorySnapshot()
+           *
+           * PURPOSE:
+           * Duplicates currently selected object(s) with an offset.
+           */ }
           <Tip label="Duplicate (Ctrl+D)">
             <Button variant="ghost" size="icon-sm" onClick={() => void editor.duplicateSelection()}>
               <Copy className="h-4 w-4" />
             </Button>
           </Tip>
+
+          {/**
+           * BUTTON: Delete
+           *
+           * LOCATION:
+           * PropertiesPanel Header Actions
+           *
+           * COMPONENT:
+           * PropertiesPanel (Button)
+           *
+           * CLICK HANDLER:
+           * editor.deleteSelection()
+           *
+           * FLOW:
+           * Button
+           * → editor.deleteSelection()
+           * → canvas.remove(activeObjects)
+           * → canvas.discardActiveObject()
+           * → pushHistorySnapshot()
+           * → emitter.emit('selection:change', { count: 0 })
+           *
+           * PURPOSE:
+           * Deletes currently selected canvas element(s).
+           */ }
           <Tip label="Delete (Del)">
             <Button variant="ghost" size="icon-sm" onClick={() => editor.deleteSelection()}>
               <Trash2 className="h-4 w-4 text-red-500" />
@@ -324,6 +406,33 @@ export function PropertiesPanel({
               </div>
             )}
 
+            {/**
+             * BUTTON: Remove Background
+             *
+             * LOCATION:
+             * PropertiesPanel Image Tools Section
+             *
+             * COMPONENT:
+             * PropertiesPanel (Button)
+             *
+             * CLICK HANDLER:
+             * handleRemoveBackground()
+             *
+             * FLOW:
+             * Button
+             * → handleRemoveBackground()
+             * → editor.removeBackgroundFromSelected(tolerance)
+             * → RoohaeEditor.removeBackgroundFromSelected()
+             * → Offscreen HTML5 Canvas render at native resolution
+             * → Perimeter border pixel chroma sampling
+             * → Color distance threshold calculation + soft alpha edge matting
+             * → FabricImage.fromURL(resultDataUrl)
+             * → Swap image layer in-place preserving exact coordinates, scale, and origin
+             * → pushHistorySnapshot()
+             *
+             * PURPOSE:
+             * Removes background pixels from the selected raster image layer without coordinate drift.
+             */ }
             <Button
               onClick={handleRemoveBackground}
               disabled={bgLoading}

@@ -1,4 +1,18 @@
 /**
+ * FILE PURPOSE:
+ * Core design document schema and structural models for Roohae templates and projects.
+ *
+ * MAIN RESPONSIBILITY:
+ * Defines the canonical JSON tree format: DesignDocument, DesignPage, DesignObject,
+ * and utilities to construct empty templates, extract referenced asset IDs, and collect fonts.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk (serializes/deserializes between Fabric.js Canvas and DesignDocument)
+ * - apps/api (stores document JSON in Template and Project models, enforces locked layers)
+ * - packages/ui (consumes page objects, placeholders, and layers)
+ */
+
+/**
  * The design document format persisted for templates and projects.
  *
  * Editor-agnostic on purpose: Fabric.js is an implementation detail of the
@@ -74,6 +88,8 @@ export interface DesignDocument {
   pages: DesignPage[];
 }
 
+// FACTORY FUNCTION:
+// Creates a default 2-page design document (Front Page & Back Page) with white backgrounds.
 export function createEmptyDocument(width: number, height: number): DesignDocument {
   return {
     version: 1,
@@ -101,6 +117,8 @@ export function createEmptyDocument(width: number, height: number): DesignDocume
  * placeholder's allowed-replacement gallery, so galleries resolve and
  * prefetch through the same pipeline as placed images.
  */
+// ASSET COLLECTOR:
+// Traverses all pages, background images, and canvas objects to extract a deduplicated array of referenced asset IDs.
 export function collectAssetIds(doc: DesignDocument): string[] {
   const ids = new Set<string>();
   for (const page of doc.pages) {
@@ -121,6 +139,8 @@ export function collectAssetIds(doc: DesignDocument): string[] {
 }
 
 /** Collect every fontFamily referenced by text objects in a document. */
+// FONT FAMILY COLLECTOR:
+// Scans all textbox/text objects across all pages to extract distinct font family names needed for preloading.
 export function collectFontFamilies(doc: DesignDocument): string[] {
   const families = new Set<string>();
   for (const page of doc.pages) {

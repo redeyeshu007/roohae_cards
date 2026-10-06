@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * FILE PURPOSE:
+ * Central editor workspace layout composing the complete Canva-style editing surface.
+ *
+ * MAIN RESPONSIBILITY:
+ * Houses the top navigation bar, collapsible left tools/asset drawer, interactive center canvas stage,
+ * contextual right properties rail, bottom pages navigator, right-click context menu, and global keyboard shortcuts.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/app/editor/[templateId]/page.tsx (Admin template designer root)
+ * - apps/user/src/components/ProjectEditor.tsx (Customer project editor root)
+ * - packages/editor-sdk/src/react/useRoohaeEditor.ts (canvas lifecycle and reactive state hook)
+ */
+
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { DesignDocument, Font } from '@roohae/shared';
 import { loadFonts, type EditorMode, type RoohaeEditor } from '@roohae/editor-sdk';
@@ -87,7 +101,9 @@ export function EditorWorkspace(props: EditorWorkspaceProps) {
     };
   }, [editor]);
 
-  // Keyboard shortcuts.
+  // KEYBOARD SHORTCUTS:
+  // Handles Delete, Undo (Ctrl+Z), Redo (Ctrl+Y), Duplicate (Ctrl+D), Copy (Ctrl+C), Paste (Ctrl+V),
+  // Zoom (+ / -), Layer arrangement ([ / ]), Lock (Ctrl+L), and quick brush shortcuts (B, P, M, H, E).
   useEffect(() => {
     if (!editor) return;
     const onKeyDown = (e: KeyboardEvent) => {

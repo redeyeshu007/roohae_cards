@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Factory for instantiating and branding new Fabric.js canvas objects.
+ *
+ * MAIN RESPONSIBILITY:
+ * Centralizes defaults, selection handle styling, geometry calculations,
+ * and Roohae metadata branding for text boxes, vector shapes, images, and imported SVGs.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls factory methods to insert objects)
+ * - packages/ui/src/editor/ToolsPanel.tsx (triggers object creation via editor methods)
+ */
+
 import {
   Circle,
   FabricImage,
@@ -13,6 +26,7 @@ import {
 } from 'fabric';
 import { defaultName, newObjectId } from './serialization';
 import type { ShapeKind, TextPreset } from './types';
+
 
 const DEFAULT_FILL = '#6366f1';
 
@@ -53,6 +67,8 @@ function brand(obj: FabricObject, name: string): FabricObject {
 
 /** Creates fully-configured fabric objects. The only place object defaults live. */
 export class ObjectFactory {
+  // OBJECT CREATION: TEXT
+  // Creates heading, subheading, or body text box scaled proportionally to canvas width.
   createText(preset: TextPreset, canvasWidth: number): FabricObject {
     const presets: Record<TextPreset, { text: string; fontSize: number; fontWeight: number }> = {
       heading: { text: 'Add a heading', fontSize: Math.round(canvasWidth / 12), fontWeight: 700 },
@@ -71,6 +87,8 @@ export class ObjectFactory {
     return brand(textbox, preset === 'body' ? 'Body text' : preset === 'heading' ? 'Heading' : 'Subheading');
   }
 
+  // OBJECT CREATION: SHAPE
+  // Instantiates vector primitives (rectangle, circle, star, polygon, heart, line) with branded selection controls.
   createShape(kind: ShapeKind, size: number): FabricObject {
     const common = { fill: DEFAULT_FILL, stroke: undefined, strokeWidth: 0 };
     switch (kind) {
@@ -117,6 +135,8 @@ export class ObjectFactory {
     }
   }
 
+  // OBJECT CREATION: IMAGE
+  // Loads an image from URL, preserves assetId linkage, scales to max allowed canvas size, and brands selection styling.
   async createImage(url: string, assetId: string, maxSize: number): Promise<FabricObject> {
     const image = await FabricImage.fromURL(url, { crossOrigin: 'anonymous' });
     const scale = Math.min(1, maxSize / Math.max(image.width ?? 1, image.height ?? 1));
@@ -124,6 +144,8 @@ export class ObjectFactory {
     return brand(image, defaultName('image'));
   }
 
+  // OBJECT CREATION: SVG (BORDER / LINE)
+  // Parses vector SVG URLs, sets strokeUniform to prevent non-uniform distortion, and packages into Fabric group.
   async createSvg(url: string, type: 'border' | 'line', maxSize: number): Promise<FabricObject> {
     const { objects, options } = await loadSVGFromURL(url);
     const validObjects = objects.filter((o): o is FabricObject => o !== null);

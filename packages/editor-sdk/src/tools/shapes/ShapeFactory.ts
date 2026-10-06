@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Factory for creating parametric vector shapes with Roohae metadata tags.
+ *
+ * MAIN RESPONSIBILITY:
+ * Constructs Rectangles, Rounded Rectangles, Circles, Triangles, Ellipses, Stars, and Polygons
+ * with normalized dimensions, fills, strokes, and roohShapeType classification.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls ShapeFactory methods)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Shapes subpanel)
+ */
+
 import {
   Rect,
   Circle,
@@ -17,7 +30,10 @@ export interface ShapeOptions {
   radius?: number;
 }
 
+// TOOL: VECTOR SHAPE FACTORY
+// Parametric constructor for geometric elements.
 export class ShapeFactory {
+
   static createRectangle(options: ShapeOptions = {}): Rect {
     const rect = new Rect({
       width: options.width || 100,

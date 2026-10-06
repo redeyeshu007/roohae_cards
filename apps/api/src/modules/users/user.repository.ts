@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Data access repository for User MongoDB collection operations.
+ *
+ * MAIN RESPONSIBILITY:
+ * Encapsulates direct database queries for users, passwordHash selection flags,
+ * account creation, and paginated searches across user names and emails.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/users/user.model.ts (UserModel schema)
+ * - apps/api/src/modules/auth/auth.service.ts (User authentication queries)
+ * - apps/api/src/modules/users/users.controller.ts (Admin user management queries)
+ */
+
 import type { FilterQuery } from 'mongoose';
 import { UserModel, type UserDoc, type UserDocument } from './user.model';
 import type { PageParams } from '../../lib/http';

@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Root layout component for the Roohae Admin Next.js web application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Configures the HTML document structure, global CSS styles, page title metadata,
+ * and wraps all pages with AppProviders (React Query, theme, and Sonner toast system).
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/lib/providers.tsx (AppProviders)
+ * - apps/admin/src/app/globals.css (Global styles)
+ */
+
 import type { Metadata } from 'next';
 import { AppProviders } from '@roohae/ui';
 import './globals.css';

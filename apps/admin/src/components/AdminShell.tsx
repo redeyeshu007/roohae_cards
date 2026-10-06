@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Core layout container and navigation sidebar for the Roohae admin control panel.
+ *
+ * MAIN RESPONSIBILITY:
+ * Renders the persistent admin navigation menu (Dashboard, Categories, Templates, Uploads, Fonts, Users, Settings),
+ * verifies admin role authorization from the auth store, and provides user dropdown sign-out actions.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/admin/src/lib/api.ts (useAuthStore for session validation and sign-out)
+ * - apps/admin/src/app/(panel)/layout.tsx (wraps all panel route pages)
+ */
+
 'use client';
 
 import Link from 'next/link';

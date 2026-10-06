@@ -1,8 +1,24 @@
+/**
+ * FILE PURPOSE:
+ * HTTP request controller handling user authentication endpoints.
+ *
+ * MAIN RESPONSIBILITY:
+ * Dispatches validated requests for registration, login, token refresh,
+ * current profile inspection, profile updates, and password changes to AuthService.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/auth/auth.routes.ts (routes invoke these controller methods)
+ * - apps/api/src/modules/auth/auth.service.ts (business logic execution)
+ */
+
 import type { Request, Response } from 'express';
 import { asyncHandler, created, ok } from '../../lib/http';
 import { authService } from './auth.service';
 
+// CONTROLLER: REGISTER USER
+// Handles POST /api/v1/auth/register
 export const register = asyncHandler(async (req: Request, res: Response) => {
+
   created(res, await authService.register(req.body));
 });
 

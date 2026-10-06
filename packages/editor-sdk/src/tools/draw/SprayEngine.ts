@@ -1,8 +1,24 @@
+/**
+ * FILE PURPOSE:
+ * Airbrush spray paint engine generating animated particle clouds.
+ *
+ * MAIN RESPONSIBILITY:
+ * Emulates aerosol spray cans using an active requestAnimationFrame particle loop that deposits
+ * scattered dots around the pointer while the mouse/stylus is held down.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/tools/common/ToolManager.ts (manages spray tool lifecycle)
+ * - packages/ui/src/editor/ToolsPanel.tsx (Draw > Spray tool)
+ */
+
 import { Image as FabricImage, Point } from 'fabric';
 import { BaseDrawTool } from './BaseDrawTool';
 import { ToolContext } from '../common/BaseTool';
 
+// DRAW TOOL: SPRAY CAN
+// Generates continuous stochastic particle splatter around pointer position via requestAnimationFrame.
 export class SprayEngine extends BaseDrawTool {
+
   private isDrawing = false;
   private offscreenCanvas!: HTMLCanvasElement;
   private ctx!: CanvasRenderingContext2D;

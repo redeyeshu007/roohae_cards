@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Users administration table for admin inside user app.
+ *
+ * MAIN RESPONSIBILITY:
+ * Lists all registered user accounts with role badges, joined timestamps, last login dates,
+ * and active/inactive status toggle switches.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/admin-queries.ts (useUsers, useSetUserActive)
+ * - apps/api/src/modules/users/users.routes.ts
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -8,6 +21,8 @@ import { useSetUserActive, useUsers } from '@/lib/admin-queries';
 
 export default function UsersPage() {
   const [search, setSearch] = useState('');
+  // API QUERIES & MUTATIONS:
+  // Fetches users and toggles active status
   const { data, isLoading } = useUsers(search);
   const setActiveMutation = useSetUserActive();
 
@@ -84,6 +99,8 @@ export default function UsersPage() {
                       }) : '—'}
                     </td>
                     <td className="px-6 py-4 text-right">
+                      {/* TOGGLE SWITCH:
+                          Toggles user active state (PATCH /api/v1/users/:id/active) */}
                       <Switch
                         checked={user.isActive}
                         disabled={user.role === 'admin'}

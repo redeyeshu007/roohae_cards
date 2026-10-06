@@ -1,3 +1,18 @@
+/**
+ * FILE PURPOSE:
+ * Structured operational API error definitions and HTTP status factories.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides the ApiError class with typed machine-readable error codes (e.g. BAD_REQUEST, UNAUTHORIZED,
+ * FORBIDDEN, NOT_FOUND, CONFLICT, UNPROCESSABLE) for uniform error responses across the backend.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/middlewares/error.middleware.ts (serializes ApiError into JSON response envelope)
+ * - apps/api/src/modules/* (services throw ApiError instances)
+ */
+
+// OPERATIONAL API ERROR CLASS:
+// Custom error class capturing HTTP status code, machine-readable code, message, and diagnostic details.
 export class ApiError extends Error {
   constructor(
     public readonly statusCode: number,

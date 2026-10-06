@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Multipart/form-data file upload validation and memory buffering middleware.
+ *
+ * MAIN RESPONSIBILITY:
+ * Uses Multer with memory storage to buffer files without compression or quality degradation,
+ * enforcing strict MIME type whitelists and file size quotas for media assets, replacement images, and typography fonts.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/assets/assets.routes.ts (uses assetUpload)
+ * - apps/api/src/modules/projects/projects.routes.ts (uses replacementUpload)
+ * - apps/api/src/modules/fonts/fonts.routes.ts (uses fontUpload)
+ */
+
 import path from 'node:path';
 import multer from 'multer';
 import {
@@ -15,6 +29,8 @@ import { ApiError } from '../lib/errors';
  * the ORIGINAL bytes are what get persisted. Thumbnails are generated as
  * separate variants; the original is never recompressed.
  */
+// MEMORY BUFFERING STORAGE:
+// Retains exact byte fidelity of user uploads in RAM before writing to local disk or Cloudflare R2.
 const memory = multer.memoryStorage();
 
 export const assetUpload = multer({

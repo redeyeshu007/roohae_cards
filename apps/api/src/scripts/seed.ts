@@ -1,10 +1,18 @@
 /**
- * Seeds the initial admin account and a starter set of categories.
- * Idempotent — safe to run repeatedly.
+ * FILE PURPOSE:
+ * Initial database seeding script for starter categories and default administrator.
  *
- *   npm run seed
+ * MAIN RESPONSIBILITY:
+ * Idempotently creates default admin user account and standard print/digital categories
+ * (Business Card, Invitation, Certificate, Instagram Post, etc.) if they do not already exist.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/users/user.model.ts
+ * - apps/api/src/modules/categories/category.model.ts
  */
+
 import bcrypt from 'bcryptjs';
+
 import { connectDatabase, disconnectDatabase } from '../config/database';
 import { env } from '../config/env';
 import { logger } from '../lib/logger';

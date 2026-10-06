@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Fullscreen background Three.js WebGL shader canvas for the landing hero section.
+ *
+ * MAIN RESPONSIBILITY:
+ * Executes a full-bleed GLSL domain-warped noise shader in brand pink palettes (#F9C2D7)
+ * with an opening light-reveal sweep and interactive pointer warping.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/app/page.tsx
+ * - apps/user/src/components/landing/hero/OpeningPage.tsx
+ */
+
 "use client";
 
 import { useEffect, useRef } from "react";

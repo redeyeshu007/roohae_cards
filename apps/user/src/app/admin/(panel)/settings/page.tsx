@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Administrative platform settings and environment summary page in user app.
+ *
+ * MAIN RESPONSIBILITY:
+ * Displays active API backend base URL, storage driver configuration (local disk vs. Cloudflare R2),
+ * and platform asset retention policies.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/lib/api.ts (API_BASE_URL)
+ * - apps/user/src/components/AdminShell.tsx (PageHeader)
+ */
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@roohae/ui';

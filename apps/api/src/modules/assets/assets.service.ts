@@ -1,3 +1,18 @@
+/**
+ * FILE PURPOSE:
+ * Digital asset processing, optimization, and metadata indexing service.
+ *
+ * MAIN RESPONSIBILITY:
+ * Ingests binary uploads, generates optimized web thumbnails using Sharp,
+ * calculates cryptographic content-addressed storage keys scoped by owner,
+ * uploads files to configured storage driver, and persists asset records to MongoDB.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/assets/assets.routes.ts (calls service methods)
+ * - apps/api/src/storage/index.ts (uploads binary blobs to storage driver)
+ * - apps/api/src/modules/assets/asset.model.ts (persists Asset metadata)
+ */
+
 import crypto from 'node:crypto';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -7,6 +22,7 @@ import { ApiError } from '../../lib/errors';
 import { logger } from '../../lib/logger';
 import type { PageParams } from '../../lib/http';
 import { AssetModel, type AssetDocument, type AssetScope } from './asset.model';
+
 
 /**
  * Matches global-library assets, including records created before the

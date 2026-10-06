@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Express route declarations for typography font catalog and administrative font uploads.
+ *
+ * MAIN RESPONSIBILITY:
+ * Exposes GET / (retrieves active fonts for canvas rendering), multipart POST / (uploads up to 8 font weight files),
+ * PATCH /:id/active (toggle availability), and DELETE /:id.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/routes.ts (mounts fontsRoutes at /api/v1/fonts)
+ * - apps/api/src/modules/fonts/fonts.service.ts (business logic)
+ * - packages/editor-sdk/src/fonts.ts (loads returned font faces into the browser)
+ */
+
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
@@ -9,6 +23,7 @@ import { ApiError } from '../../lib/errors';
 import { fontsService } from './fonts.service';
 
 export const fontsRoutes = Router();
+
 
 // Users need active fonts to render text in their projects.
 fontsRoutes.get(

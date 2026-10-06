@@ -1,3 +1,15 @@
+/**
+ * FILE PURPOSE:
+ * Navigation link component for page routes in the user application.
+ *
+ * MAIN RESPONSIBILITY:
+ * Wraps Next.js Link primitive to provide a drop-in replacement with transition styling support.
+ *
+ * CONNECTED SYSTEMS:
+ * - Next.js App Router (Link)
+ * - apps/user/src/components/*
+ */
+
 "use client";
 
 import Link from "next/link";

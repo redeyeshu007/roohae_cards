@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Floating navigation header button for the landing page.
+ *
+ * MAIN RESPONSIBILITY:
+ * Monitors window scroll position to dynamically adapt background blur and border colors,
+ * providing a direct animated link to /login.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/common/TransitionLink.tsx
+ * - apps/user/src/app/page.tsx
+ */
+
 "use client";
 
 import { TransitionLink } from "@/components/common/TransitionLink";

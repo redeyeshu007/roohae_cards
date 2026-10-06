@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Zustand state store coordinating multi-stage WebGL/canvas page transition animations.
+ *
+ * MAIN RESPONSIBILITY:
+ * Manages the lifecycle phases ("idle" -> "covering" -> "covered" -> "revealing")
+ * and target destination URL for seamless liquid/paper shader scene transitions.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/user/src/components/common/TransitionLink.tsx
+ * - apps/user/src/components/common/PageTransitionCanvas.tsx
+ * - apps/user/src/hooks/usePageTransition.ts
+ */
+
 import { create } from "zustand";
 
 type Phase = "idle" | "covering" | "covered" | "revealing";

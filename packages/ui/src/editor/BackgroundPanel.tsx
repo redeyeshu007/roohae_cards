@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Background configuration sidebar panel for the active design page.
+ *
+ * MAIN RESPONSIBILITY:
+ * Provides solid color palette pickers, custom hex color inputs, and background image asset upload/controls
+ * (opacity, blur, fit options: fit, fill, stretch, center, tile).
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/ui/src/editor/LeftSidebar.tsx (renders BackgroundPanel when Background tab is active)
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls setPageBackground and setPageBackgroundAsset)
+ * - apps/admin & apps/user (supplies onUpload callback to persist background media)
+ */
+
 import { Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { RoohaeEditor } from '@roohae/editor-sdk';

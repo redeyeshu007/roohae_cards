@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * JWT signing and verification cryptography routines.
+ *
+ * MAIN RESPONSIBILITY:
+ * Signs short-lived access tokens (15m TTL) and rotating refresh tokens (30d TTL),
+ * and validates token signatures, expiration dates, and tokenVersion revocation state.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/modules/auth/auth.service.ts (generates tokens on login/register/refresh)
+ * - apps/api/src/middlewares/auth.middleware.ts (verifies access tokens on protected routes)
+ */
+
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import type { Role } from '@roohae/shared';
 import { env } from '../config/env';

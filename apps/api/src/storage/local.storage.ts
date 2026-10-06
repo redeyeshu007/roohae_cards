@@ -1,3 +1,16 @@
+/**
+ * FILE PURPOSE:
+ * Local filesystem object storage provider for development environments.
+ *
+ * MAIN RESPONSIBILITY:
+ * Writes uploaded assets and fonts to disk inside env.LOCAL_UPLOAD_DIR,
+ * enforces directory traversal protection, and constructs static HTTP URLs.
+ *
+ * CONNECTED SYSTEMS:
+ * - apps/api/src/storage/index.ts (instantiates LocalStorageProvider if STORAGE_DRIVER=local)
+ * - apps/api/src/app.ts (serves local upload folder at /uploads)
+ */
+
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { env } from '../config/env';
@@ -7,7 +20,10 @@ import type { PutObjectInput, StorageProvider } from './storage.provider';
  * Development storage: writes originals to the local uploads directory and
  * serves them via express.static under /uploads.
  */
+// LOCAL STORAGE DRIVER:
+// Implements StorageProvider using Node.js fs.promises for local development.
 export class LocalStorageProvider implements StorageProvider {
+
   readonly name = 'local' as const;
   readonly rootDir: string;
 

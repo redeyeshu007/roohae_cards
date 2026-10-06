@@ -1,3 +1,17 @@
+/**
+ * FILE PURPOSE:
+ * Serialization and deserialization bridge between Fabric.js runtime objects and Roohae Design Documents.
+ *
+ * MAIN RESPONSIBILITY:
+ * Preserves Roohae metadata (locks, editable flags, placeholders, asset references) across canvas saves,
+ * and reconstructs Fabric-ready JSON while resolving asset IDs to accessible asset URLs.
+ *
+ * CONNECTED SYSTEMS:
+ * - packages/editor-sdk/src/RoohaeEditor.ts (calls toDesignObject and pageToFabricJSON)
+ * - packages/editor-sdk/src/ExportService.ts (loads JSON for offscreen static canvas exports)
+ * - apps/api (stores the resulting DesignDocument JSON in MongoDB)
+ */
+
 import { util } from 'fabric';
 import type { FabricObject } from 'fabric';
 import type { DesignObject, DesignPage } from '@roohae/shared';
@@ -12,6 +26,7 @@ import type { DesignObject, DesignPage } from '@roohae/shared';
  * `roohEditable` to avoid colliding with fabric's own Textbox.editable
  * (which controls inline text editing).
  */
+
 export const CUSTOM_PROPS = [
   'id',
   'name',
